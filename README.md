@@ -150,8 +150,8 @@ uv run alembic downgrade -1                            # 1つ戻す
 
 ## デプロイ（公開サーバーでの運用）
 
-Render への一括デプロイに対応しています（`render.yaml` 同梱）。
-手順は **[docs/deploy.md](docs/deploy.md)** を参照してください（GitHubへpush → RenderでBlueprint選択 → 環境変数入力のみ）。
+**完全無料構成**（Render無料プラン + Neon無料PostgreSQL）での公開に対応しています（`render.yaml` 同梱）。
+手順は **[docs/deploy.md](docs/deploy.md)** を参照してください（GitHubへpush → Neonで無料DB作成 → RenderでBlueprint選択 → 環境変数入力のみ）。
 
 - 初期管理者は環境変数 `ADMIN_EMAIL` / `ADMIN_PASSWORD` で自動作成されます（DBが空の場合のみ）
 - `DATABASE_URL` は `postgres://` 形式でも自動で `postgresql+psycopg://` に正規化されます

@@ -1,14 +1,13 @@
 # ==========================================================
-# Render Blueprint - Be.カラフル Well-being個別支援AI
-# Render ダッシュボードで「New +」→「Blueprint」→ このリポジトリを
-# 選択すると、DB・バックエンド・フロントエンドが一括作成されます。
-# 詳細手順: docs/deploy.md
+# Render Blueprint - Be.カラフル Well-being個別支援AI（無料構成）
+#
+# - API・フロントエンド: Render 無料プラン
+#   （15分アクセスがないとスリープし、次回アクセス時に約1分かかります）
+# - データベース: Neon（https://neon.tech）の無料PostgreSQLを使用
+#   （Renderの無料DBは約1か月で削除されるため使いません）
+#
+# 手順: docs/deploy.md を参照
 # ==========================================================
-
-databases:
-  - name: becolorful-db
-    plan: basic-256mb # 最小プラン。無料で試す場合は free（90日で期限切れ・要注意）
-    region: singapore # 日本から最も近いリージョン
 
 services:
   # ---- バックエンド API（FastAPI / Docker）----
@@ -17,7 +16,7 @@ services:
     runtime: docker
     rootDir: backend
     region: singapore
-    plan: starter # 無料で試す場合は free（15分でスリープする点に注意）
+    plan: free
     healthCheckPath: /api/health
     envVars:
       - key: ENVIRONMENT
@@ -25,9 +24,7 @@ services:
       - key: SECRET_KEY
         generateValue: true # Renderが安全なランダム値を自動生成
       - key: DATABASE_URL
-        fromDatabase:
-          name: becolorful-db
-          property: connectionString
+        sync: false # Neonの接続文字列をダッシュボードで手入力
       - key: AI_PROVIDER
         value: mock # Gemini利用時はダッシュボードで gemini に変更
       - key: GEMINI_API_KEY
@@ -41,7 +38,7 @@ services:
       - key: ADMIN_PASSWORD
         sync: false # 同パスワード（8文字以上・手入力）
 
-  # ---- フロントエンド（React 静的サイト）----
+  # ---- フロントエンド（React 静的サイト・無料）----
   - type: web
     name: becolorful-app
     runtime: static
