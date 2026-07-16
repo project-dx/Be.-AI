@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", Meiryo,
+    system-ui, sans-serif;
+}
+
+body {
+  @apply bg-emerald-50/40 text-slate-800 antialiased;
+}

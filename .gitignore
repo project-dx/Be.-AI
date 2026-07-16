@@ -1,0 +1,22 @@
+# 環境変数（秘密情報はコミットしない）
+.env
+backend/.env
+frontend/.env
+
+# Python
+__pycache__/
+*.py[cod]
+backend/.venv/
+backend/*.db
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/coverage/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

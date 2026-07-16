@@ -1,0 +1,59 @@
+# ==========================================================
+# Render Blueprint - Be.カラフル Well-being個別支援AI
+# Render ダッシュボードで「New +」→「Blueprint」→ このリポジトリを
+# 選択すると、DB・バックエンド・フロントエンドが一括作成されます。
+# 詳細手順: docs/deploy.md
+# ==========================================================
+
+databases:
+  - name: becolorful-db
+    plan: basic-256mb # 最小プラン。無料で試す場合は free（90日で期限切れ・要注意）
+    region: singapore # 日本から最も近いリージョン
+
+services:
+  # ---- バックエンド API（FastAPI / Docker）----
+  - type: web
+    name: becolorful-api
+    runtime: docker
+    rootDir: backend
+    region: singapore
+    plan: starter # 無料で試す場合は free（15分でスリープする点に注意）
+    healthCheckPath: /api/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true # Renderが安全なランダム値を自動生成
+      - key: DATABASE_URL
+        fromDatabase:
+          name: becolorful-db
+          property: connectionString
+      - key: AI_PROVIDER
+        value: mock # Gemini利用時はダッシュボードで gemini に変更
+      - key: GEMINI_API_KEY
+        sync: false # ダッシュボードで手入力（リポジトリに含めない）
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: CORS_ORIGINS
+        value: https://becolorful-app.onrender.com
+      - key: ADMIN_EMAIL
+        sync: false # 初回起動時に作成される管理者のメールアドレス（手入力）
+      - key: ADMIN_PASSWORD
+        sync: false # 同パスワード（8文字以上・手入力）
+
+  # ---- フロントエンド（React 静的サイト）----
+  - type: web
+    name: becolorful-app
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    routes:
+      # /api へのアクセスをバックエンドへ転送
+      - type: rewrite
+        source: /api/*
+        destination: https://becolorful-api.onrender.com/api/*
+      # SPAルーティング
+      - type: rewrite
+        source: /*
+        destination: /index.html
