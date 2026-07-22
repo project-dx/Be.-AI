@@ -75,7 +75,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     )
 
 
-@app.get("/api/health", tags=["ヘルスチェック"])
+# HEADは死活監視ツール（UptimeRobot等）が使うため明示的に許可する
+@app.api_route("/api/health", methods=["GET", "HEAD"], tags=["ヘルスチェック"])
 def health() -> dict:
     return {"status": "ok", "ai_provider": settings.ai_provider}
 
