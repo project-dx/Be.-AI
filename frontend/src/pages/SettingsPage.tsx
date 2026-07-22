@@ -76,13 +76,13 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-800">⚙️ システム設定</h1>
-      <p className="text-sm text-slate-500">
+      <h1 className="text-xl font-bold text-ink">⚙️ システム設定</h1>
+      <p className="text-sm text-ink-soft">
         スコア計算の配点を調整できます。合計が100点になるように設定してください（詳細は docs/scoring-rules.md）
       </p>
       <ErrorMessage message={error} />
       {message && (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <p role="status" className="rounded-xl border border-emerald-200 bg-brand-leaf-soft px-4 py-3 text-sm text-emerald-800">
           ✅ {message}
         </p>
       )}
@@ -95,7 +95,7 @@ export default function SettingsPage() {
               <div className="space-y-2.5">
                 {Object.entries(values).map(([key, value]) => (
                   <div key={key} className="flex items-center justify-between gap-3">
-                    <label className="text-sm text-slate-600" htmlFor={`${group}-${key}`}>
+                    <label className="text-sm text-ink-soft" htmlFor={`${group}-${key}`}>
                       {keyLabels[key] ?? key}
                     </label>
                     <input
@@ -110,11 +110,11 @@ export default function SettingsPage() {
                           [group]: { ...values, [key]: Number(e.target.value) },
                         })
                       }
-                      className="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-sm text-right"
+                      className="w-20 rounded-lg border border-line-strong px-2 py-1.5 text-sm text-right"
                     />
                   </div>
                 ))}
-                <p className={`text-right text-xs font-bold ${total === 100 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                <p className={`text-right text-xs font-bold ${total === 100 ? 'text-brand-leaf' : 'text-rose-600'}`}>
                   合計: {total}点{total !== 100 && '（100点になるよう調整してください）'}
                 </p>
               </div>

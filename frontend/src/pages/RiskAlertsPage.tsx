@@ -32,8 +32,8 @@ export default function RiskAlertsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-800">🔔 リスクアラート</h1>
-      <p className="text-sm text-slate-500">
+      <h1 className="text-xl font-bold text-ink">🔔 リスクアラート</h1>
+      <p className="text-sm text-ink-soft">
         ルールベースの自動判定です。誤検知の可能性があるため、必ずスタッフによる確認を行ってください。外部への自動通報は行われません
       </p>
       <div className="flex gap-2">
@@ -42,7 +42,7 @@ export default function RiskAlertsPage() {
             key={f}
             onClick={() => setFilter(f)}
             className={`rounded-xl px-4 py-2 text-sm font-bold ${
-              filter === f ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-500'
+              filter === f ? 'bg-brand-leaf text-white' : 'bg-white border border-line text-ink-soft'
             }`}
           >
             {f === 'open' ? '未確認' : f === 'acknowledged' ? '確認済み' : 'すべて'}
@@ -66,15 +66,15 @@ export default function RiskAlertsPage() {
                     />
                     <Badge
                       label={a.status === 'open' ? '未確認' : '確認済み'}
-                      className={a.status === 'open' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}
+                      className={a.status === 'open' ? 'bg-rose-100 text-rose-800' : 'bg-brand-leaf-soft text-emerald-800'}
                     />
-                    <Link to={`/users/${a.user_id}`} className="font-bold text-slate-800 hover:underline">
+                    <Link to={`/users/${a.user_id}`} className="font-bold text-ink hover:underline">
                       {a.user_name ?? `利用者 #${a.user_id}`}
                     </Link>
-                    <span className="text-xs text-slate-500">{alertTypeLabels[a.alert_type] ?? a.alert_type}</span>
+                    <span className="text-xs text-ink-soft">{alertTypeLabels[a.alert_type] ?? a.alert_type}</span>
                   </div>
-                  <p className="mt-1.5 text-sm text-slate-600">{a.reason}</p>
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1.5 text-sm text-ink-soft">{a.reason}</p>
+                  <p className="mt-1 text-xs text-ink-faint">
                     発生: {formatDateTime(a.created_at)}
                     {a.acknowledged_at && ` ／ 確認: ${formatDateTime(a.acknowledged_at)}`}
                   </p>

@@ -26,7 +26,7 @@ export default function MyReportsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-800">📖 過去のふりかえり</h1>
+      <h1 className="text-xl font-bold text-ink">📖 過去のふりかえり</h1>
       {reports.length === 0 ? (
         <EmptyState message="まだ日報がありません。「今日の日報」から入力してみましょう" />
       ) : (
@@ -39,14 +39,14 @@ export default function MyReportsPage() {
                 aria-expanded={openId === r.id}
               >
                 <div className="flex items-center gap-3">
-                  <span className="font-bold text-slate-700">{formatDate(r.report_date)}</span>
+                  <span className="font-bold text-ink">{formatDate(r.report_date)}</span>
                   {r.is_draft && <Badge label="下書き" className="bg-amber-100 text-amber-800" />}
-                  <span className="text-sm text-slate-500">気分 {scaleText(r.mood)} ／ 睡眠 {r.sleep_hours ?? '-'}時間</span>
+                  <span className="text-sm text-ink-soft">気分 {scaleText(r.mood)} ／ 睡眠 {r.sleep_hours ?? '-'}時間</span>
                 </div>
-                <span aria-hidden className="text-slate-400">{openId === r.id ? '▲' : '▼'}</span>
+                <span aria-hidden className="text-ink-faint">{openId === r.id ? '▲' : '▼'}</span>
               </button>
               {openId === r.id && (
-                <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm border-t border-slate-100 pt-4">
+                <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm border-t border-line pt-4">
                   <Item label="睡眠の質" value={scaleText(r.sleep_quality)} />
                   <Item label="就寝 / 起床" value={`${r.bedtime ?? '-'} / ${r.wake_time ?? '-'}`} />
                   <Item label="食事" value={`朝: ${mealLabels[r.breakfast_status ?? ''] ?? '-'} ／ 昼: ${mealLabels[r.lunch_status ?? ''] ?? '-'} ／ 夜: ${mealLabels[r.dinner_status ?? ''] ?? '-'}`} />
@@ -72,8 +72,8 @@ export default function MyReportsPage() {
 function Item({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
   return (
     <div className={wide ? 'sm:col-span-2' : ''}>
-      <dt className="text-xs font-bold text-slate-400">{label}</dt>
-      <dd className="text-slate-700 whitespace-pre-wrap">{value}</dd>
+      <dt className="text-xs font-bold text-ink-faint">{label}</dt>
+      <dd className="text-ink whitespace-pre-wrap">{value}</dd>
     </div>
   )
 }

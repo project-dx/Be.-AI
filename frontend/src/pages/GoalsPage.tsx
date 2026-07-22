@@ -58,7 +58,7 @@ export default function GoalsPage({ targetUserId }: { targetUserId?: number }) {
 
   return (
     <div className="space-y-4">
-      {!targetUserId && <h1 className="text-xl font-bold text-slate-800">🎯 目標管理</h1>}
+      {!targetUserId && <h1 className="text-xl font-bold text-ink">🎯 目標管理</h1>}
       <ErrorMessage message={error} />
 
       <Card title="新しい目標を登録">
@@ -88,9 +88,9 @@ export default function GoalsPage({ targetUserId }: { targetUserId?: number }) {
               <Card key={g.id}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-bold text-slate-700">{g.title}</p>
-                    {g.description && <p className="text-sm text-slate-500 mt-0.5">{g.description}</p>}
-                    <p className="text-xs text-slate-400 mt-1">目標日: {formatDate(g.target_date)}</p>
+                    <p className="font-bold text-ink">{g.title}</p>
+                    {g.description && <p className="text-sm text-ink-soft mt-0.5">{g.description}</p>}
+                    <p className="text-xs text-ink-faint mt-1">目標日: {formatDate(g.target_date)}</p>
                   </div>
                   <Badge label={status.label} className={status.className} />
                 </div>
@@ -102,7 +102,7 @@ export default function GoalsPage({ targetUserId }: { targetUserId?: number }) {
                         key={p}
                         onClick={() => updateProgress(g, p)}
                         className={`rounded-lg border px-2.5 py-1 text-xs ${
-                          g.progress === p ? 'border-emerald-500 bg-emerald-50 font-bold text-emerald-800' : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                          g.progress === p ? 'border-brand-leaf bg-brand-leaf-soft font-bold text-emerald-800' : 'border-line text-ink-soft hover:bg-paper'
                         }`}
                       >
                         {p}%

@@ -33,10 +33,13 @@ export function TrendLineChart({ data, series, xKey = 'date', yDomain, unit, hei
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey={xKey} tickFormatter={(v) => shortDate(String(v))} fontSize={11} stroke="#64748b" />
-        <YAxis domain={yDomain ?? [0, 'auto']} fontSize={11} stroke="#64748b" unit={unit} />
-        <Tooltip labelFormatter={(v) => shortDate(String(v))} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#eee8dd" />
+        <XAxis dataKey={xKey} tickFormatter={(v) => shortDate(String(v))} fontSize={11} stroke="#a8a297" />
+        <YAxis domain={yDomain ?? [0, 'auto']} fontSize={11} stroke="#a8a297" unit={unit} />
+        <Tooltip
+          labelFormatter={(v) => shortDate(String(v))}
+          contentStyle={{ borderRadius: 14, border: '1px solid #eae4d9', boxShadow: '0 8px 24px -8px rgba(67,63,56,0.18)', fontSize: 12 }}
+        />
         {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
         {series.map((s) => (
           <Line
@@ -69,13 +72,15 @@ export function SimpleBarChart({ data, series, xKey = 'label', yDomain, unit, he
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-        <XAxis dataKey={xKey} fontSize={11} stroke="#64748b" />
-        <YAxis domain={yDomain ?? [0, 'auto']} fontSize={11} stroke="#64748b" unit={unit} />
-        <Tooltip />
+        <CartesianGrid strokeDasharray="3 3" stroke="#eee8dd" />
+        <XAxis dataKey={xKey} fontSize={11} stroke="#a8a297" />
+        <YAxis domain={yDomain ?? [0, 'auto']} fontSize={11} stroke="#a8a297" unit={unit} />
+        <Tooltip
+          contentStyle={{ borderRadius: 14, border: '1px solid #eae4d9', boxShadow: '0 8px 24px -8px rgba(67,63,56,0.18)', fontSize: 12 }}
+        />
         {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
         {series.map((s) => (
-          <Bar key={s.key} dataKey={s.key} name={s.name} fill={s.color} radius={[6, 6, 0, 0]} />
+          <Bar key={s.key} dataKey={s.key} name={s.name} fill={s.color} radius={[8, 8, 0, 0]} />
         ))}
       </BarChart>
     </ResponsiveContainer>
@@ -83,10 +88,10 @@ export function SimpleBarChart({ data, series, xKey = 'label', yDomain, unit, he
 }
 
 export const chartColors = {
-  green: '#10b981',
-  blue: '#3b82f6',
-  orange: '#f59e0b',
-  pink: '#ec4899',
-  violet: '#8b5cf6',
-  rose: '#f43f5e',
+  green: '#6aaf5c',
+  blue: '#4d9ad0',
+  orange: '#ee8a4f',
+  pink: '#e85d8a',
+  violet: '#9179c6',
+  rose: '#e05c5c',
 }

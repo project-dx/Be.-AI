@@ -44,9 +44,9 @@ export default function StaffReportFormPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <h1 className="text-xl font-bold text-slate-800">🖊️ スタッフ日報（支援記録）</h1>
-      <p className="text-sm text-slate-500">
-        対象利用者: <span className="font-bold text-slate-700">{target?.profile?.display_name ?? '読み込み中…'}</span>
+      <h1 className="text-xl font-bold text-ink">🖊️ スタッフ日報（支援記録）</h1>
+      <p className="text-sm text-ink-soft">
+        対象利用者: <span className="font-bold text-ink">{target?.profile?.display_name ?? '読み込み中…'}</span>
       </p>
       <ErrorMessage message={serverError} />
 
@@ -105,8 +105,8 @@ export default function StaffReportFormPage() {
                       urgency === key
                         ? key === 'urgent'
                           ? 'border-rose-600 bg-rose-600 text-white'
-                          : 'border-emerald-500 bg-emerald-50 text-emerald-800'
-                        : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                          : 'border-brand-leaf bg-brand-leaf-soft text-emerald-800'
+                        : 'border-line bg-white text-ink-soft hover:bg-paper'
                     }`}
                   >
                     {urgencyLabels[key].label}

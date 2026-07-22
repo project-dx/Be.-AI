@@ -29,7 +29,7 @@ export default function StaffDashboardPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-bold text-slate-800">🏠 スタッフダッシュボード</h1>
+      <h1 className="text-xl font-bold text-ink">🏠 スタッフダッシュボード</h1>
       <ErrorMessage message={error} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -47,12 +47,12 @@ export default function StaffDashboardPage() {
               <li key={r.id} className="rounded-xl bg-rose-50 px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge label="至急" className="bg-rose-600 text-white" />
-                  <Link to={`/users/${r.user_id}`} className="font-bold text-slate-800 underline decoration-rose-300 hover:text-rose-700">
+                  <Link to={`/users/${r.user_id}`} className="font-bold text-ink underline decoration-rose-300 hover:text-rose-700">
                     {r.user_name ?? `利用者 #${r.user_id}`}
                   </Link>
-                  <span className="text-xs text-slate-500">{formatDate(r.report_date)}</span>
+                  <span className="text-xs text-ink-soft">{formatDate(r.report_date)}</span>
                 </div>
-                {r.support_content && <p className="mt-1 text-sm text-slate-600">{r.support_content}</p>}
+                {r.support_content && <p className="mt-1 text-sm text-ink-soft">{r.support_content}</p>}
               </li>
             ))}
           </ul>
@@ -73,13 +73,13 @@ export default function StaffDashboardPage() {
                       label={a.severity === 'high' ? '重要' : a.severity === 'medium' ? '中' : '低'}
                       className={a.severity === 'high' ? 'bg-rose-600 text-white' : 'bg-amber-200 text-amber-900'}
                     />
-                    <Link to={`/users/${a.user_id}`} className="font-bold text-slate-800 underline decoration-amber-300 hover:text-amber-700">
+                    <Link to={`/users/${a.user_id}`} className="font-bold text-ink underline decoration-amber-300 hover:text-amber-700">
                       {a.user_name ?? `利用者 #${a.user_id}`}
                     </Link>
-                    <span className="text-xs text-slate-500">{alertTypeLabels[a.alert_type] ?? a.alert_type}</span>
-                    <span className="text-xs text-slate-400">{formatDateTime(a.created_at)}</span>
+                    <span className="text-xs text-ink-soft">{alertTypeLabels[a.alert_type] ?? a.alert_type}</span>
+                    <span className="text-xs text-ink-faint">{formatDateTime(a.created_at)}</span>
                   </div>
-                  <p className="mt-1 text-sm text-slate-600">{a.reason}</p>
+                  <p className="mt-1 text-sm text-ink-soft">{a.reason}</p>
                 </div>
                 <button
                   onClick={() => acknowledge(a.id)}
@@ -101,7 +101,7 @@ export default function StaffDashboardPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-xs text-slate-400">
+                <tr className="border-b border-line text-left text-xs text-ink-faint">
                   <th className="py-2 pr-3 font-bold">利用者</th>
                   <th className="py-2 pr-3 font-bold">最終日報</th>
                   <th className="py-2 pr-3 font-bold">生活リズム</th>
@@ -115,9 +115,9 @@ export default function StaffDashboardPage() {
                 {data.users.map((u) => {
                   const stress = u.latest_score?.stress_status ? stressLabels[u.latest_score.stress_status] : null
                   return (
-                    <tr key={u.user_id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <tr key={u.user_id} className="border-b border-line hover:bg-paper">
                       <td className="py-2.5 pr-3">
-                        <Link to={`/users/${u.user_id}`} className="font-bold text-emerald-700 hover:underline">
+                        <Link to={`/users/${u.user_id}`} className="font-bold text-brand-leaf hover:underline">
                           {u.display_name}
                         </Link>
                       </td>
@@ -132,7 +132,7 @@ export default function StaffDashboardPage() {
                         {u.open_alert_count > 0 ? (
                           <Badge label={`${u.open_alert_count}件`} className="bg-rose-100 text-rose-800" />
                         ) : (
-                          <span className="text-slate-400">なし</span>
+                          <span className="text-ink-faint">なし</span>
                         )}
                       </td>
                     </tr>

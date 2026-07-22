@@ -119,19 +119,19 @@ export default function ActionsPanel({ userId }: { userId: number }) {
           {actions.map((a) => (
             <Card key={a.id}>
               <div className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="font-bold text-slate-700">{formatDate(a.action_date)}</span>
+                <span className="font-bold text-ink">{formatDate(a.action_date)}</span>
                 {a.effect_score != null && (
                   <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
                     効果 {a.effect_score}/5（{effectLabels[a.effect_score]}）
                   </span>
                 )}
                 {planTitle(a.support_plan_id) && (
-                  <span className="text-xs text-slate-400">📋 {planTitle(a.support_plan_id)}</span>
+                  <span className="text-xs text-ink-faint">📋 {planTitle(a.support_plan_id)}</span>
                 )}
               </div>
-              <p className="mt-1.5 text-sm text-slate-700">{a.action_content}</p>
-              {a.user_response && <p className="mt-1 text-xs text-slate-500">反応: {a.user_response}</p>}
-              {a.next_action && <p className="mt-1 text-xs text-slate-500">次のアクション: {a.next_action}</p>}
+              <p className="mt-1.5 text-sm text-ink">{a.action_content}</p>
+              {a.user_response && <p className="mt-1 text-xs text-ink-soft">反応: {a.user_response}</p>}
+              {a.next_action && <p className="mt-1 text-xs text-ink-soft">次のアクション: {a.next_action}</p>}
             </Card>
           ))}
         </div>

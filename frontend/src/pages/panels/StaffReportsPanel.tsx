@@ -35,18 +35,18 @@ export default function StaffReportsPanel({ userId }: { userId: number }) {
               aria-expanded={openId === r.id}
             >
               <span className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="font-bold text-slate-700">{formatDate(r.report_date)}</span>
+                <span className="font-bold text-ink">{formatDate(r.report_date)}</span>
                 <Badge label={urgency.label} className={urgency.className} />
-                <span className="text-slate-500">{r.staff_name ?? ''}</span>
-                <span className="text-slate-400">{r.support_minutes != null ? `${r.support_minutes}分` : ''}</span>
+                <span className="text-ink-soft">{r.staff_name ?? ''}</span>
+                <span className="text-ink-faint">{r.support_minutes != null ? `${r.support_minutes}分` : ''}</span>
               </span>
-              <span aria-hidden className="text-slate-400">{openId === r.id ? '▲' : '▼'}</span>
+              <span aria-hidden className="text-ink-faint">{openId === r.id ? '▲' : '▼'}</span>
             </button>
             {openId !== r.id && r.support_content && (
-              <p className="mt-1 truncate text-sm text-slate-500">{r.support_content}</p>
+              <p className="mt-1 truncate text-sm text-ink-soft">{r.support_content}</p>
             )}
             {openId === r.id && (
-              <dl className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-sm">
+              <dl className="mt-3 space-y-2 border-t border-line pt-3 text-sm">
                 {(
                   [
                     ['支援内容', r.support_content],
@@ -64,8 +64,8 @@ export default function StaffReportsPanel({ userId }: { userId: number }) {
                   .filter(([, v]) => v)
                   .map(([label, value]) => (
                     <div key={label}>
-                      <dt className="text-xs font-bold text-slate-400">{label}</dt>
-                      <dd className="whitespace-pre-wrap text-slate-700">{value}</dd>
+                      <dt className="text-xs font-bold text-ink-faint">{label}</dt>
+                      <dd className="whitespace-pre-wrap text-ink">{value}</dd>
                     </div>
                   ))}
               </dl>

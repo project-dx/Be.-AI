@@ -9,11 +9,11 @@ export function Field({ label, required, error, children, hint }: {
 }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-bold text-slate-700">
+      <label className="block text-sm font-bold text-ink">
         {label}
-        {required && <span className="ml-1 rounded bg-rose-100 px-1.5 py-0.5 text-xs text-rose-700">必須</span>}
+        {required && <span className="ml-1.5 rounded-full bg-brand-pink-soft px-2 py-0.5 text-xs font-bold text-brand-pink">必須</span>}
       </label>
-      {hint && <p className="text-xs text-slate-500">{hint}</p>}
+      {hint && <p className="text-xs text-ink-soft">{hint}</p>}
       {children}
       {error && (
         <p role="alert" className="text-xs font-bold text-rose-600">
@@ -25,7 +25,7 @@ export function Field({ label, required, error, children, hint }: {
 }
 
 export const inputClass =
-  'w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200'
+  'w-full rounded-2xl border border-line-strong bg-white px-3.5 py-2.5 text-sm transition-colors placeholder:text-ink-faint focus:border-brand-sea focus:outline-none focus:ring-4 focus:ring-brand-sea/15'
 
 const scaleEmojis: Record<number, string> = { 1: '😞', 2: '😕', 3: '😐', 4: '🙂', 5: '😄' }
 const scaleEmojisReverse: Record<number, string> = { 1: '😄', 2: '🙂', 3: '😐', 4: '😣', 5: '😫' }
@@ -51,10 +51,10 @@ export function ScaleInput({ value, onChange, name, reverse = false, lowLabel, h
             aria-checked={value === n}
             aria-label={`${n}`}
             onClick={() => onChange(n)}
-            className={`flex h-12 flex-1 flex-col items-center justify-center rounded-xl border text-xs transition-colors ${
+            className={`flex h-13 flex-1 flex-col items-center justify-center rounded-2xl border text-xs transition-all ${
               value === n
-                ? 'border-emerald-500 bg-emerald-50 font-bold text-emerald-800 ring-2 ring-emerald-200'
-                : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                ? 'border-brand-leaf bg-brand-leaf-soft font-bold text-ink ring-4 ring-brand-leaf/15 scale-[1.04]'
+                : 'border-line bg-white text-ink-soft hover:bg-paper hover:border-line-strong'
             }`}
           >
             <span aria-hidden className="text-base leading-none">{emojis[n]}</span>
@@ -62,7 +62,7 @@ export function ScaleInput({ value, onChange, name, reverse = false, lowLabel, h
           </button>
         ))}
       </div>
-      <div className="mt-1 flex justify-between text-xs text-slate-400">
+      <div className="mt-1.5 flex justify-between text-xs text-ink-faint">
         <span>{lowLabel}</span>
         <span>{highLabel}</span>
       </div>
@@ -89,10 +89,10 @@ export function MealInput({ value, onChange }: {
           role="radio"
           aria-checked={value === opt.value}
           onClick={() => onChange(opt.value)}
-          className={`flex-1 rounded-xl border px-2 py-2.5 text-sm transition-colors ${
+          className={`flex-1 rounded-2xl border px-2 py-2.5 text-sm transition-all ${
             value === opt.value
-              ? 'border-emerald-500 bg-emerald-50 font-bold text-emerald-800'
-              : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+              ? 'border-brand-leaf bg-brand-leaf-soft font-bold text-ink ring-4 ring-brand-leaf/15'
+              : 'border-line bg-white text-ink-soft hover:bg-paper hover:border-line-strong'
           }`}
         >
           {opt.label}
@@ -106,7 +106,7 @@ export function PrimaryButton({ children, ...props }: React.ButtonHTMLAttributes
   return (
     <button
       {...props}
-      className={`rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50 ${props.className ?? ''}`}
+      className={`rounded-2xl bg-brand-leaf px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_14px_-4px_rgb(106_175_92/0.55)] transition-all hover:brightness-105 hover:shadow-[0_6px_18px_-4px_rgb(106_175_92/0.65)] active:scale-[0.98] disabled:opacity-50 disabled:shadow-none ${props.className ?? ''}`}
     >
       {children}
     </button>
@@ -117,7 +117,7 @@ export function SecondaryButton({ children, ...props }: React.ButtonHTMLAttribut
   return (
     <button
       {...props}
-      className={`rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 ${props.className ?? ''}`}
+      className={`rounded-2xl border border-line-strong bg-white px-5 py-2.5 text-sm font-bold text-ink-soft transition-colors hover:bg-paper active:scale-[0.98] disabled:opacity-50 ${props.className ?? ''}`}
     >
       {children}
     </button>

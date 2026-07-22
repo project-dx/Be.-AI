@@ -59,19 +59,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="color-drops flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="text-center mb-6">
+        <div className="text-center mb-7 rise-in">
           <h1 className="flex justify-center">
             <Logo className="h-14" />
           </h1>
-          <p className="text-sm text-slate-500 mt-3">Well-being個別支援AI</p>
+          <p className="mt-3 text-[11px] font-bold tracking-[0.22em] text-ink-faint">
+            WELL-BEING個別支援AI
+          </p>
         </div>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4 rounded-2xl bg-white border border-slate-200 p-6 shadow-sm"
+          className="rise-in rise-in-1 relative space-y-4 overflow-hidden rounded-3xl bg-white border border-line p-7 shadow-pop"
           noValidate
         >
+          <div className="rainbow-bar absolute inset-x-0 top-0 h-1.5" aria-hidden />
           <ErrorMessage message={serverError} />
           <Field label="メールアドレス" required error={errors.email?.message}>
             <input type="email" autoComplete="email" className={inputClass} {...register('email')} />
@@ -85,11 +88,11 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
-                className="mt-0.5 h-5 w-5 rounded border-slate-300 accent-emerald-600"
+                className="mt-0.5 h-5 w-5 rounded border-line-strong accent-brand-leaf"
               />
               <span>
-                <span className="block text-sm font-bold text-slate-700">次回から入力を省略する</span>
-                <span className="block text-xs text-slate-400 mt-0.5">
+                <span className="block text-sm font-bold text-ink">次回から入力を省略する</span>
+                <span className="block text-xs text-ink-faint mt-0.5">
                   メールアドレスとパスワードをこの端末に保存します。ほかの人も使う端末ではチェックしないでください
                 </span>
               </span>
@@ -99,7 +102,7 @@ export default function LoginPage() {
             {isSubmitting ? 'ログイン中…' : 'ログイン'}
           </PrimaryButton>
         </form>
-        <p className="mt-4 text-center text-xs text-slate-400">
+        <p className="rise-in rise-in-2 mt-5 text-center text-xs text-ink-faint">
           本システムのAI出力は医療診断ではなく、支援判断を補助する参考情報です
         </p>
       </div>

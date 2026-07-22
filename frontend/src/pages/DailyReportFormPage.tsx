@@ -176,13 +176,13 @@ export default function DailyReportFormPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div>
-        <h1 className="text-xl font-bold text-slate-800">📝 今日の日報</h1>
-        <p className="text-sm text-slate-500 mt-1">3分くらいで入力できます。途中で「下書き保存」もできます</p>
+        <h1 className="text-xl font-bold text-ink">📝 今日の日報</h1>
+        <p className="text-sm text-ink-soft mt-1">3分くらいで入力できます。途中で「下書き保存」もできます</p>
       </div>
 
       <ErrorMessage message={serverError} />
       {savedMessage && (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <p role="status" className="rounded-xl border border-emerald-200 bg-brand-leaf-soft px-4 py-3 text-sm text-emerald-800">
           ✅ {savedMessage}
         </p>
       )}
@@ -194,8 +194,8 @@ export default function DailyReportFormPage() {
 
       {confirmUpdate && (
         <div role="alertdialog" aria-label="更新の確認" className="rounded-xl border-2 border-amber-400 bg-white p-4 space-y-3">
-          <p className="text-sm font-bold text-slate-700">送信済みの日報を更新しますか？</p>
-          <p className="text-sm text-slate-500">この日付の日報は既に送信されています。内容を上書きして更新します。</p>
+          <p className="text-sm font-bold text-ink">送信済みの日報を更新しますか？</p>
+          <p className="text-sm text-ink-soft">この日付の日報は既に送信されています。内容を上書きして更新します。</p>
           <div className="flex gap-2">
             <PrimaryButton onClick={() => save(false, true)} disabled={saving}>更新する</PrimaryButton>
             <SecondaryButton onClick={() => setConfirmUpdate(false)}>キャンセル</SecondaryButton>
@@ -211,7 +211,7 @@ export default function DailyReportFormPage() {
             onClick={() => setStep(i)}
             aria-current={step === i ? 'step' : undefined}
             className={`flex-1 rounded-xl px-1 py-2 text-xs font-bold transition-colors ${
-              step === i ? 'bg-emerald-600 text-white' : i < step ? 'bg-emerald-100 text-emerald-800' : 'bg-white border border-slate-200 text-slate-400'
+              step === i ? 'bg-brand-leaf text-white' : i < step ? 'bg-brand-leaf-soft text-emerald-800' : 'bg-white border border-line text-ink-faint'
             }`}
           >
             {i + 1}. {label}

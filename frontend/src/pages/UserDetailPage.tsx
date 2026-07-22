@@ -45,20 +45,20 @@ export default function UserDetailPage() {
   return (
     <div className="space-y-4">
       {flash && (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <p role="status" className="rounded-xl border border-emerald-200 bg-brand-leaf-soft px-4 py-3 text-sm text-emerald-800">
           ✅ {flash}
         </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-800">🙂 {user.profile?.display_name ?? user.email}</h1>
-          <p className="text-xs text-slate-400 mt-0.5">
+          <h1 className="text-xl font-bold text-ink">🙂 {user.profile?.display_name ?? user.email}</h1>
+          <p className="text-xs text-ink-faint mt-0.5">
             支援開始日: {formatDate(user.profile?.support_start_date)} ／ {user.email}
           </p>
         </div>
         <Link
           to={`/users/${id}/staff-report/new`}
-          className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"
+          className="rounded-xl bg-brand-leaf px-4 py-2.5 text-sm font-bold text-white hover:brightness-105"
         >
           🖊️ スタッフ日報を書く
         </Link>
@@ -71,7 +71,7 @@ export default function UserDetailPage() {
             onClick={() => setSearchParams({ tab: t.key })}
             aria-current={tab === t.key ? 'page' : undefined}
             className={`whitespace-nowrap rounded-xl px-4 py-2 text-sm font-bold transition-colors ${
-              tab === t.key ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'
+              tab === t.key ? 'bg-brand-leaf text-white' : 'bg-white border border-line text-ink-soft hover:bg-paper'
             }`}
           >
             {t.label}

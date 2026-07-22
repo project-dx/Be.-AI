@@ -30,7 +30,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-xl font-bold text-slate-800">🏢 管理者ダッシュボード</h1>
+      <h1 className="text-xl font-bold text-ink">🏢 管理者ダッシュボード</h1>
       <ErrorMessage message={error} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -57,9 +57,9 @@ export default function AdminDashboardPage() {
               {Object.entries(data.plan_status_counts).map(([status, count]) => {
                 const label = planStatusLabels[status as PlanStatus]
                 return (
-                  <li key={status} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5">
-                    <Badge label={label?.label ?? status} className={label?.className ?? 'bg-slate-100 text-slate-700'} />
-                    <span className="font-bold text-slate-700">{count}件</span>
+                  <li key={status} className="flex items-center justify-between rounded-xl bg-paper px-4 py-2.5">
+                    <Badge label={label?.label ?? status} className={label?.className ?? 'bg-paper-deep text-ink'} />
+                    <span className="font-bold text-ink">{count}件</span>
                   </li>
                 )
               })}
@@ -81,13 +81,13 @@ export default function AdminDashboardPage() {
                       label={a.severity === 'high' ? '重要' : '中'}
                       className={a.severity === 'high' ? 'bg-rose-600 text-white' : 'bg-amber-200 text-amber-900'}
                     />
-                    <Link to={`/users/${a.user_id}`} className="font-bold text-slate-800 underline decoration-amber-300">
+                    <Link to={`/users/${a.user_id}`} className="font-bold text-ink underline decoration-amber-300">
                       {a.user_name ?? `利用者 #${a.user_id}`}
                     </Link>
-                    <span className="text-xs text-slate-500">{alertTypeLabels[a.alert_type] ?? a.alert_type}</span>
-                    <span className="text-xs text-slate-400">{formatDateTime(a.created_at)}</span>
+                    <span className="text-xs text-ink-soft">{alertTypeLabels[a.alert_type] ?? a.alert_type}</span>
+                    <span className="text-xs text-ink-faint">{formatDateTime(a.created_at)}</span>
                   </div>
-                  <p className="mt-1 text-sm text-slate-600">{a.reason}</p>
+                  <p className="mt-1 text-sm text-ink-soft">{a.reason}</p>
                 </div>
                 <button
                   onClick={() => acknowledge(a.id)}

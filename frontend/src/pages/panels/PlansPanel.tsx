@@ -140,14 +140,14 @@ export default function PlansPanel({ userId }: { userId: number }) {
         <button
           onClick={generate}
           disabled={busy}
-          className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="rounded-xl bg-brand-leaf px-4 py-2.5 text-sm font-bold text-white hover:brightness-105 disabled:opacity-50"
         >
           {busy ? '処理中…' : '🤖 AIで下書きを生成（直近30日）'}
         </button>
         {plans.length > 0 && (
           <select
             aria-label="支援計画を選択"
-            className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm"
+            className="rounded-xl border border-line-strong bg-white px-3 py-2.5 text-sm"
             value={selected?.id ?? ''}
             onChange={(e) => setSelected(plans.find((p) => p.id === Number(e.target.value)) ?? null)}
           >
@@ -201,8 +201,8 @@ export default function PlansPanel({ userId }: { userId: number }) {
           <Card>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h3 className="font-bold text-slate-800">{selected.title}</h3>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                <h3 className="font-bold text-ink">{selected.title}</h3>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-faint">
                   <Badge {...planStatusLabels[selected.status]} label={planStatusLabels[selected.status].label} />
                   <span>更新: {formatDateTime(selected.updated_at)}</span>
                   {selected.approved_at && <span>承認: {formatDateTime(selected.approved_at)}</span>}
@@ -237,8 +237,8 @@ export default function PlansPanel({ userId }: { userId: number }) {
                 if (!value) return null
                 return (
                   <div key={key}>
-                    <dt className="text-xs font-bold text-slate-400">{label}</dt>
-                    <dd className="whitespace-pre-wrap text-slate-700">{value}</dd>
+                    <dt className="text-xs font-bold text-ink-faint">{label}</dt>
+                    <dd className="whitespace-pre-wrap text-ink">{value}</dd>
                   </div>
                 )
               })}
@@ -247,9 +247,9 @@ export default function PlansPanel({ userId }: { userId: number }) {
                 if (!value || value.length === 0) return null
                 return (
                   <div key={key}>
-                    <dt className="text-xs font-bold text-slate-400">{label}</dt>
+                    <dt className="text-xs font-bold text-ink-faint">{label}</dt>
                     <dd>
-                      <ul className="list-disc pl-5 text-slate-700 space-y-0.5">
+                      <ul className="list-disc pl-5 text-ink space-y-0.5">
                         {value.map((item, i) => <li key={i}>{item}</li>)}
                       </ul>
                     </dd>
@@ -257,8 +257,8 @@ export default function PlansPanel({ userId }: { userId: number }) {
                 )
               })}
               <div>
-                <dt className="text-xs font-bold text-slate-400">評価日 / 次回見直し日</dt>
-                <dd className="text-slate-700">{formatDate(selected.evaluation_date)} / {formatDate(selected.next_review_date)}</dd>
+                <dt className="text-xs font-bold text-ink-faint">評価日 / 次回見直し日</dt>
+                <dd className="text-ink">{formatDate(selected.evaluation_date)} / {formatDate(selected.next_review_date)}</dd>
               </div>
             </dl>
           </Card>
@@ -271,10 +271,10 @@ export default function PlansPanel({ userId }: { userId: number }) {
             ) : (
               <ul className="space-y-1.5 text-sm">
                 {versions.map((v) => (
-                  <li key={v.id} className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-3 py-2">
-                    <Badge label={`v${v.version_number}`} className="bg-slate-200 text-slate-700" />
-                    <span className="text-slate-700">{v.change_reason ?? '変更'}</span>
-                    <span className="ml-auto text-xs text-slate-400">{formatDateTime(v.created_at)}</span>
+                  <li key={v.id} className="flex flex-wrap items-center gap-2 rounded-lg bg-paper px-3 py-2">
+                    <Badge label={`v${v.version_number}`} className="bg-paper-deep text-ink" />
+                    <span className="text-ink">{v.change_reason ?? '変更'}</span>
+                    <span className="ml-auto text-xs text-ink-faint">{formatDateTime(v.created_at)}</span>
                   </li>
                 ))}
               </ul>

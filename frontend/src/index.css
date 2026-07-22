@@ -1,10 +1,113 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", Meiryo,
-    system-ui, sans-serif;
+  /* 本文: すっきりした角ゴシック / 見出し: 温かい丸ゴシック */
+  --font-sans: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "BIZ UDPGothic", Meiryo, system-ui, sans-serif;
+  --font-display: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Zen Kaku Gothic New",
+    Meiryo, system-ui, sans-serif;
+
+  /* 紙のような温かいニュートラル */
+  --color-paper: #faf7f2;
+  --color-paper-deep: #f3eee6;
+  --color-ink: #433f38;
+  --color-ink-soft: #7d776c;
+  --color-ink-faint: #a8a297;
+  --color-line: #eae4d9;
+  --color-line-strong: #ddd5c7;
+
+  /* Be.カラフルのブランドカラー（ロゴの色彩から） */
+  --color-brand-pink: #e85d8a;
+  --color-brand-coral: #ee8a4f;
+  --color-brand-sun: #e9b32e;
+  --color-brand-leaf: #6aaf5c;
+  --color-brand-sea: #4d9ad0;
+  --color-brand-plum: #9179c6;
+
+  /* 淡いトーン（カード・チップの下地） */
+  --color-brand-pink-soft: #fdeef4;
+  --color-brand-coral-soft: #fdf1e7;
+  --color-brand-sun-soft: #fbf4dd;
+  --color-brand-leaf-soft: #edf6ea;
+  --color-brand-sea-soft: #eaf3fb;
+  --color-brand-plum-soft: #f2eefa;
+
+  --shadow-card: 0 1px 2px rgb(67 63 56 / 0.04), 0 6px 20px -6px rgb(67 63 56 / 0.08);
+  --shadow-card-hover: 0 2px 4px rgb(67 63 56 / 0.05), 0 12px 28px -8px rgb(67 63 56 / 0.14);
+  --shadow-pop: 0 8px 30px -6px rgb(67 63 56 / 0.18);
 }
 
 body {
-  @apply bg-emerald-50/40 text-slate-800 antialiased;
+  @apply bg-paper text-ink antialiased;
+  font-feature-settings: "palt";
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
+
+/* Be.カラフルのシグネチャー: レインボーの細帯 */
+.rainbow-bar {
+  background: linear-gradient(
+    90deg,
+    #e85d8a 0%, #ee8a4f 18%, #e9b32e 38%, #6aaf5c 58%, #4d9ad0 78%, #9179c6 100%
+  );
+}
+
+/* ログイン画面などの背景に浮かぶ色彩 */
+.color-drops {
+  background:
+    radial-gradient(420px 320px at 12% 8%, rgb(232 93 138 / 0.09), transparent 65%),
+    radial-gradient(380px 300px at 88% 16%, rgb(77 154 208 / 0.10), transparent 65%),
+    radial-gradient(420px 340px at 20% 92%, rgb(233 179 46 / 0.10), transparent 65%),
+    radial-gradient(360px 300px at 85% 85%, rgb(106 175 92 / 0.09), transparent 65%);
+}
+
+/* やわらかいスクロールバー */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #ddd5c7;
+  border-radius: 999px;
+  border: 2px solid #faf7f2;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c9bfae;
+}
+
+/* キーボード操作時のフォーカスを温かい色で */
+:focus-visible {
+  outline: 2px solid #4d9ad0;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ページ読み込み時のふわっとした登場 */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise-in {
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rise-in-1 { animation-delay: 0.05s; }
+.rise-in-2 { animation-delay: 0.12s; }
+.rise-in-3 { animation-delay: 0.19s; }
+.rise-in-4 { animation-delay: 0.26s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise-in, .rise-in-1, .rise-in-2, .rise-in-3, .rise-in-4 {
+    animation: none;
+  }
 }

@@ -26,7 +26,7 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-800">📋 監査ログ</h1>
+      <h1 className="text-xl font-bold text-ink">📋 監査ログ</h1>
       <input
         type="search"
         aria-label="操作名で絞り込み"
@@ -44,7 +44,7 @@ export default function AuditLogsPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
               <thead>
-                <tr className="border-b border-slate-200 text-left text-xs text-slate-400">
+                <tr className="border-b border-line text-left text-xs text-ink-faint">
                   <th className="py-2 pr-3 font-bold">日時</th>
                   <th className="py-2 pr-3 font-bold">操作者</th>
                   <th className="py-2 pr-3 font-bold">操作</th>
@@ -53,11 +53,11 @@ export default function AuditLogsPage() {
               </thead>
               <tbody>
                 {logs.map((log) => (
-                  <tr key={log.id} className="border-b border-slate-100">
-                    <td className="py-2 pr-3 whitespace-nowrap text-slate-500">{formatDateTime(log.created_at)}</td>
-                    <td className="py-2 pr-3 text-slate-700">{log.actor_email ?? '-'}</td>
-                    <td className="py-2 pr-3"><code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">{log.action}</code></td>
-                    <td className="py-2 text-slate-500">
+                  <tr key={log.id} className="border-b border-line">
+                    <td className="py-2 pr-3 whitespace-nowrap text-ink-soft">{formatDateTime(log.created_at)}</td>
+                    <td className="py-2 pr-3 text-ink">{log.actor_email ?? '-'}</td>
+                    <td className="py-2 pr-3"><code className="rounded bg-paper-deep px-1.5 py-0.5 text-xs">{log.action}</code></td>
+                    <td className="py-2 text-ink-soft">
                       {log.target_type ? `${log.target_type}${log.target_id ? ` #${log.target_id}` : ''}` : '-'}
                     </td>
                   </tr>

@@ -4,11 +4,11 @@ function ErrorShell({ icon, title, message }: { icon: string; title: string; mes
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
       <p className="text-4xl" aria-hidden>{icon}</p>
-      <h1 className="mt-3 text-xl font-bold text-slate-700">{title}</h1>
-      <p className="mt-2 text-sm text-slate-500">{message}</p>
+      <h1 className="mt-3 text-xl font-bold text-ink">{title}</h1>
+      <p className="mt-2 text-sm text-ink-soft">{message}</p>
       <Link
         to="/dashboard"
-        className="mt-6 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"
+        className="mt-6 rounded-xl bg-brand-leaf px-5 py-2.5 text-sm font-bold text-white hover:brightness-105"
       >
         ホームへ戻る
       </Link>

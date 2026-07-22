@@ -10,7 +10,7 @@ import type { User } from '../types'
 const roleLabels: Record<string, { label: string; className: string }> = {
   admin: { label: '管理者', className: 'bg-violet-100 text-violet-800' },
   staff: { label: 'スタッフ', className: 'bg-sky-100 text-sky-800' },
-  user: { label: '利用者', className: 'bg-emerald-100 text-emerald-800' },
+  user: { label: '利用者', className: 'bg-brand-leaf-soft text-emerald-800' },
 }
 
 export default function AccountsPage() {
@@ -74,10 +74,10 @@ export default function AccountsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-bold text-slate-800">🗝️ アカウント管理</h1>
+      <h1 className="text-xl font-bold text-ink">🗝️ アカウント管理</h1>
       <ErrorMessage message={error} />
       {message && (
-        <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <p role="status" className="rounded-xl border border-emerald-200 bg-brand-leaf-soft px-4 py-3 text-sm text-emerald-800">
           ✅ {message}
         </p>
       )}
@@ -122,7 +122,7 @@ export default function AccountsPage() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-xs text-slate-400">
+              <tr className="border-b border-line text-left text-xs text-ink-faint">
                 <th className="py-2 pr-3 font-bold">表示名</th>
                 <th className="py-2 pr-3 font-bold">メール</th>
                 <th className="py-2 pr-3 font-bold">ロール</th>
@@ -134,20 +134,20 @@ export default function AccountsPage() {
               {users.map((u) => {
                 const r = roleLabels[u.role]
                 return (
-                  <tr key={u.id} className="border-b border-slate-100">
-                    <td className="py-2.5 pr-3 font-bold text-slate-700">{u.profile?.display_name ?? '-'}</td>
-                    <td className="py-2.5 pr-3 text-slate-500">{u.email}</td>
+                  <tr key={u.id} className="border-b border-line">
+                    <td className="py-2.5 pr-3 font-bold text-ink">{u.profile?.display_name ?? '-'}</td>
+                    <td className="py-2.5 pr-3 text-ink-soft">{u.email}</td>
                     <td className="py-2.5 pr-3"><Badge label={r.label} className={r.className} /></td>
                     <td className="py-2.5 pr-3">
                       <Badge
                         label={u.is_active ? '有効' : '無効'}
-                        className={u.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}
+                        className={u.is_active ? 'bg-brand-leaf-soft text-emerald-800' : 'bg-paper-deep text-ink-soft'}
                       />
                     </td>
                     <td className="py-2.5">
                       <button
                         onClick={() => toggleActive(u)}
-                        className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                        className="rounded-lg border border-line px-3 py-1 text-xs text-ink-soft hover:bg-paper"
                       >
                         {u.is_active ? '無効化' : '有効化'}
                       </button>

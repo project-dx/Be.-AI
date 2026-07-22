@@ -55,14 +55,14 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
         <button
           onClick={run}
           disabled={running}
-          className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="rounded-xl bg-brand-leaf px-4 py-2.5 text-sm font-bold text-white hover:brightness-105 disabled:opacity-50"
         >
           {running ? '分析中…（少しお待ちください）' : '🤖 AI分析を実行（直近14日）'}
         </button>
         {analyses.length > 0 && (
           <select
             aria-label="過去の分析を選択"
-            className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm"
+            className="rounded-xl border border-line-strong bg-white px-3 py-2.5 text-sm"
             value={selected?.id ?? ''}
             onChange={(e) => setSelected(analyses.find((a) => a.id === Number(e.target.value)) ?? null)}
           >
@@ -85,10 +85,10 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
               ⚠️ AI呼び出しに失敗したため、ルールベースの参考情報を表示しています
             </p>
           )}
-          <Card title="📄 要約" accent="text-emerald-700">
-            <p className="text-sm text-slate-700">{r.summary}</p>
+          <Card title="📄 要約" accent="text-brand-leaf">
+            <p className="text-sm text-ink">{r.summary}</p>
             {r.confidence != null && (
-              <p className="mt-2 text-xs text-slate-400">確信度: {Math.round((r.confidence ?? 0) * 100)}%（参考値）</p>
+              <p className="mt-2 text-xs text-ink-faint">確信度: {Math.round((r.confidence ?? 0) * 100)}%（参考値）</p>
             )}
           </Card>
 
@@ -97,16 +97,16 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
               {(r.strengths ?? []).length === 0 ? (
                 <EmptyState message="記録された強みはありません" />
               ) : (
-                <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                <ul className="list-disc space-y-1 pl-5 text-sm text-ink">
                   {r.strengths?.map((s, i) => <li key={i}>{s}</li>)}
                 </ul>
               )}
             </Card>
             <Card title="👀 気になる傾向" accent="text-amber-700">
               {(r.concerns ?? []).length === 0 ? (
-                <p className="text-sm text-slate-500">大きな懸念は検出されていません</p>
+                <p className="text-sm text-ink-soft">大きな懸念は検出されていません</p>
               ) : (
-                <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                <ul className="list-disc space-y-1 pl-5 text-sm text-ink">
                   {r.concerns?.map((s, i) => <li key={i}>{s}</li>)}
                 </ul>
               )}
@@ -115,13 +115,13 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
 
           {r.trend_analysis && (
             <Card title="📈 推移の分析">
-              <p className="text-sm text-slate-700">{r.trend_analysis}</p>
+              <p className="text-sm text-ink">{r.trend_analysis}</p>
             </Card>
           )}
 
           {(r.risk_flags ?? []).length > 0 && (
             <Card title="🚩 リスクフラグ（スタッフによる確認が必要）" accent="text-rose-700" className="border-rose-200 border-2">
-              <ul className="space-y-1 text-sm text-slate-700">
+              <ul className="space-y-1 text-sm text-ink">
                 {r.risk_flags?.map((f, i) => (
                   <li key={i}>・{f.detail}</li>
                 ))}
@@ -139,29 +139,29 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
                   return (
                     <div key={i} className="rounded-xl border border-violet-100 bg-violet-50/40 p-4">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-bold text-slate-800 text-sm">{rec.title}</p>
+                        <p className="font-bold text-ink text-sm">{rec.title}</p>
                         <Badge label={priority.label} className={priority.className} />
                         {rec.next_check_date && (
-                          <span className="text-xs text-slate-400">次回確認: {rec.next_check_date}</span>
+                          <span className="text-xs text-ink-faint">次回確認: {rec.next_check_date}</span>
                         )}
                       </div>
                       <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div className="rounded-lg bg-white p-3 border border-slate-100">
-                          <p className="font-bold text-slate-500 mb-1">✅ 確認できる事実</p>
+                        <div className="rounded-lg bg-white p-3 border border-line">
+                          <p className="font-bold text-ink-soft mb-1">✅ 確認できる事実</p>
                           {(rec.observed_facts ?? []).length > 0 ? (
-                            <ul className="list-disc pl-4 space-y-0.5 text-slate-700">
+                            <ul className="list-disc pl-4 space-y-0.5 text-ink">
                               {rec.observed_facts.map((f, j) => <li key={j}>{f}</li>)}
                             </ul>
                           ) : (
-                            <p className="text-slate-400">記載なし</p>
+                            <p className="text-ink-faint">記載なし</p>
                           )}
                         </div>
-                        <div className="rounded-lg bg-white p-3 border border-slate-100">
-                          <p className="font-bold text-slate-500 mb-1">💭 AIによる仮説</p>
-                          <p className="text-slate-700">{rec.hypothesis || '記載なし'}</p>
+                        <div className="rounded-lg bg-white p-3 border border-line">
+                          <p className="font-bold text-ink-soft mb-1">💭 AIによる仮説</p>
+                          <p className="text-ink">{rec.hypothesis || '記載なし'}</p>
                         </div>
                       </div>
-                      <dl className="mt-2 space-y-1 text-xs text-slate-600">
+                      <dl className="mt-2 space-y-1 text-xs text-ink-soft">
                         <div><dt className="inline font-bold">推奨する支援: </dt><dd className="inline">{rec.action}</dd></div>
                         <div><dt className="inline font-bold">理由: </dt><dd className="inline">{rec.reason}</dd></div>
                         {(rec.questions ?? []).length > 0 && (
@@ -178,13 +178,13 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
             )}
           </Card>
 
-          <Card title="🙂 利用者向け提案（最大3件）" accent="text-emerald-700">
+          <Card title="🙂 利用者向け提案（最大3件）" accent="text-brand-leaf">
             {(r.user_recommendations ?? []).length === 0 ? (
               <EmptyState message="利用者向け提案はありません" />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {r.user_recommendations?.map((rec, i) => (
-                  <div key={i} className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-xs">
+                  <div key={i} className="rounded-xl border border-emerald-100 bg-brand-leaf-soft/50 p-4 text-xs">
                     <p className="font-bold text-emerald-900 text-sm mb-1.5">{rec.title}</p>
                     <p><span className="font-bold">やること:</span> {rec.action}</p>
                     <p><span className="font-bold">なぜ:</span> {rec.reason}</p>
@@ -203,8 +203,8 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
                 if (!value || typeof value !== 'string') return null
                 return (
                   <div key={String(key)}>
-                    <dt className="text-xs font-bold text-slate-400">{label}</dt>
-                    <dd className="text-slate-700">{value}</dd>
+                    <dt className="text-xs font-bold text-ink-faint">{label}</dt>
+                    <dd className="text-ink">{value}</dd>
                   </div>
                 )
               })}
@@ -213,7 +213,7 @@ export default function AnalysisPanel({ userId }: { userId: number }) {
 
           {(r.data_limitations ?? []).length > 0 && (
             <Card title="⚠️ データの制約">
-              <ul className="list-disc pl-5 text-xs text-slate-500 space-y-1">
+              <ul className="list-disc pl-5 text-xs text-ink-soft space-y-1">
                 {r.data_limitations?.map((s, i) => <li key={i}>{s}</li>)}
               </ul>
             </Card>
