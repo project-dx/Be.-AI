@@ -11,7 +11,7 @@ import httpx
 from pydantic import BaseModel, ValidationError
 
 from app.core.config import get_settings
-from app.schemas.ai import AiAnalysisResult, SupportPlanDraft
+from app.schemas.ai import AiAnalysisResult, MonthlyReportResult, SupportPlanDraft
 from app.services.ai.base import AIService, AIServiceError, load_prompt
 
 GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -79,3 +79,6 @@ class GeminiAIService(AIService):
 
     def generate_support_plan(self, context: dict[str, Any]) -> SupportPlanDraft:
         return self._generate_validated("support_plan_prompt.md", context, SupportPlanDraft)
+
+    def generate_monthly_report(self, context: dict[str, Any]) -> MonthlyReportResult:
+        return self._generate_validated("monthly_report_prompt.md", context, MonthlyReportResult)

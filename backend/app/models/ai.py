@@ -8,6 +8,25 @@ from app.core.database import Base
 from app.models.user import utcnow
 
 
+class MonthlyReport(Base):
+    """事業所全体の月次分析レポート"""
+
+    __tablename__ = "monthly_reports"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    year_month: Mapped[str] = mapped_column(String(7), index=True, nullable=False)  # "2026-07"
+    period_start: Mapped[date] = mapped_column(Date, nullable=False)
+    period_end: Mapped[date] = mapped_column(Date, nullable=False)
+    model_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    prompt_version: Mapped[str] = mapped_column(String(10), default="1.0", nullable=False)
+    facts_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)  # コードで集計した事実データ
+    result_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)  # AIが生成した分析文
+    status: Mapped[str] = mapped_column(String(10), default="success", nullable=False)
+    error_message: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True, nullable=False)
+
+
 class AiAnalysis(Base):
     __tablename__ = "ai_analyses"
 

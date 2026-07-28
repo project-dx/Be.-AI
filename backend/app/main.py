@@ -13,6 +13,7 @@ from app.api import (
     daily_reports,
     dashboard,
     goals,
+    monthly_reports,
     risks,
     scores,
     staff_reports,
@@ -87,6 +88,7 @@ app.include_router(daily_reports.router)
 app.include_router(staff_reports.router)
 app.include_router(scores.router)
 app.include_router(ai_analyses.router)
+app.include_router(monthly_reports.router)
 app.include_router(support_plans.router)
 app.include_router(goals.router)
 app.include_router(risks.router)

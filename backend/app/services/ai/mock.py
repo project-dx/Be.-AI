@@ -8,6 +8,7 @@ from typing import Any
 
 from app.schemas.ai import (
     AiAnalysisResult,
+    MonthlyReportResult,
     RiskFlag,
     StaffRecommendation,
     SupportPlanDraft,
@@ -254,3 +255,8 @@ class MockAIService(AIService):
             evaluation_metrics=["睡眠スコアの推移", "日報入力率", "短期目標の達成度", "面談での本人の評価"],
             notes="本計画はAIが生成した下書きです。スタッフが本人の意向を確認し、編集・承認してから使用してください。",
         )
+
+    def generate_monthly_report(self, context: dict[str, Any]) -> MonthlyReportResult:
+        from app.services.ai.monthly import generate_monthly_report_mock
+
+        return generate_monthly_report_mock(context)

@@ -13,6 +13,7 @@ import StaffReportFormPage from './pages/StaffReportFormPage'
 import MyReportsPage from './pages/MyReportsPage'
 import GoalsPage from './pages/GoalsPage'
 import RiskAlertsPage from './pages/RiskAlertsPage'
+import MonthlyReportPage from './pages/MonthlyReportPage'
 import AccountsPage from './pages/AccountsPage'
 import AuditLogsPage from './pages/AuditLogsPage'
 import SettingsPage from './pages/SettingsPage'
@@ -107,6 +108,14 @@ export default function App() {
               element={
                 <RequireAuth roles={['staff', 'admin']}>
                   <RiskAlertsPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/monthly-report"
+              element={
+                <RequireAuth roles={['staff', 'admin']}>
+                  <MonthlyReportPage />
                 </RequireAuth>
               }
             />

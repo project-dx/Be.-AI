@@ -1,7 +1,7 @@
 from app.models.user import Profile, User
 from app.models.report import StaffDailyReport, UserDailyReport
 from app.models.score import ScoreResult
-from app.models.ai import AiAnalysis
+from app.models.ai import AiAnalysis, MonthlyReport
 from app.models.plan import SupportAction, SupportPlan, SupportPlanVersion
 from app.models.goal import Goal
 from app.models.risk import RiskAlert
@@ -15,6 +15,7 @@ __all__ = [
     "StaffDailyReport",
     "ScoreResult",
     "AiAnalysis",
+    "MonthlyReport",
     "SupportPlan",
     "SupportPlanVersion",
     "SupportAction",

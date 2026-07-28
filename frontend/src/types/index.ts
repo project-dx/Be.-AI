@@ -303,3 +303,48 @@ export interface AdminDashboard {
   plan_status_counts: Record<string, number>
   alerts: StaffDashboard['alerts']
 }
+
+// --- 月次レポート ---
+export interface MonthlyUserAnalysis {
+  user_id: number
+  display_name: string
+  mental: string
+  condition: string
+  skill: string
+  plan: string
+}
+
+export interface MonthlyReport {
+  id: number
+  year_month: string
+  period_start: string
+  period_end: string
+  model_name: string
+  prompt_version: string
+  facts_json: {
+    period: { start: string; end: string }
+    user_names: Record<string, string>
+    attendance: {
+      user_id: number
+      attended_dates: string[]
+      absence_dates: string[]
+      report_count: number
+    }[]
+    condition_distribution: Record<string, number>
+    mood_distribution: Record<string, number>
+    skill_distribution: Record<string, number>
+    total_users: number
+    total_reports: number
+  } | null
+  result_json: {
+    analysis_points: string
+    skill_trends: string
+    user_analyses: MonthlyUserAnalysis[]
+    action_plan: { title: string; detail: string }[]
+    data_limitations: string[]
+    confidence: number
+  } | null
+  status: string
+  error_message: string | null
+  created_at: string
+}

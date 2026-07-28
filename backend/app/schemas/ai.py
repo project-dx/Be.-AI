@@ -68,6 +68,53 @@ class SupportPlanDraft(BaseModel):
     notes: str = ""
 
 
+class MonthlyUserAnalysis(BaseModel):
+    """月次レポートの利用者別分析（AIには氏名を渡さずuser_idで紐付ける）"""
+
+    user_id: int
+    mental: str  # メンタル面の傾向
+    condition: str  # 体調面の傾向
+    skill: str  # スキル・活動の傾向
+    plan: str  # 傾向と対策
+
+    display_name: str = ""  # サーバー側で付与（AI出力には含まれない）
+
+
+class ActionPlanStep(BaseModel):
+    title: str
+    detail: str
+
+
+class MonthlyReportResult(BaseModel):
+    """月次レポートのAI生成部分のスキーマ（検証必須）"""
+
+    analysis_points: str  # 全体の分析ポイント
+    skill_trends: str  # 事業所全体のスキル傾向
+    user_analyses: list[MonthlyUserAnalysis] = []
+    action_plan: list[ActionPlanStep] = Field(default=[], max_length=5)
+    data_limitations: list[str] = []
+    confidence: float = Field(default=0.5, ge=0, le=1)
+
+
+class MonthlyReportRequest(BaseModel):
+    year_month: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")  # 例: 2026-07
+
+
+class MonthlyReportOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    year_month: str
+    period_start: date
+    period_end: date
+    model_name: str
+    prompt_version: str
+    facts_json: dict[str, Any] | None
+    result_json: dict[str, Any] | None
+    status: str
+    error_message: str | None
+    created_at: datetime
+
+
 class AiAnalysisRequest(BaseModel):
     analysis_type: str = Field(default="daily_analysis", pattern="^(daily_analysis|risk_review)$")
     period_days: int = Field(default=14, ge=3, le=90)

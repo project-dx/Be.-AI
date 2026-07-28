@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-from app.schemas.ai import AiAnalysisResult, SupportPlanDraft
+from app.schemas.ai import AiAnalysisResult, MonthlyReportResult, SupportPlanDraft
 
 PROMPTS_DIR = Path(__file__).resolve().parent.parent.parent / "prompts"
 
@@ -34,3 +34,7 @@ class AIService(ABC):
     @abstractmethod
     def generate_support_plan(self, context: dict[str, Any]) -> SupportPlanDraft:
         """個別支援計画の下書きを生成する。"""
+
+    @abstractmethod
+    def generate_monthly_report(self, context: dict[str, Any]) -> MonthlyReportResult:
+        """事業所全体の月次分析レポートを生成する。"""

@@ -5,6 +5,7 @@ import type {
   AuditLog,
   DailyReport,
   Goal,
+  MonthlyReport,
   PlanVersion,
   RiskAlert,
   ScoreResult,
@@ -206,6 +207,16 @@ export const dashboardApi = {
   admin: () => api.get<AdminDashboard>('/dashboard/admin').then((r) => r.data),
   forUser: (userId: number) =>
     api.get<UserDashboard>(`/users/${userId}/dashboard`).then((r) => r.data),
+}
+
+// --- 月次レポート ---
+export const monthlyReportsApi = {
+  list: (limit = 12) =>
+    api.get<MonthlyReport[]>('/monthly-reports', { params: { limit } }).then((r) => r.data),
+  latest: (yearMonth: string) =>
+    api.get<MonthlyReport>('/monthly-reports/latest', { params: { year_month: yearMonth } }).then((r) => r.data),
+  generate: (yearMonth: string) =>
+    api.post<MonthlyReport>('/monthly-reports', { year_month: yearMonth }).then((r) => r.data),
 }
 
 // --- 監査ログ・設定 ---
