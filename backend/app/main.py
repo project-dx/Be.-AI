@@ -20,6 +20,7 @@ from app.api import (
     support_plans,
     system_settings,
     users,
+    wellbeing,
 )
 from app.core.bootstrap import bootstrap_initial_admin
 from app.core.config import get_settings
@@ -89,6 +90,7 @@ app.include_router(staff_reports.router)
 app.include_router(scores.router)
 app.include_router(ai_analyses.router)
 app.include_router(monthly_reports.router)
+app.include_router(wellbeing.router)
 app.include_router(support_plans.router)
 app.include_router(goals.router)
 app.include_router(risks.router)

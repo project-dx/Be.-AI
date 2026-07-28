@@ -7,6 +7,7 @@ from app.models.goal import Goal
 from app.models.risk import RiskAlert
 from app.models.audit import AuditLog
 from app.models.setting import SystemSetting
+from app.models.wellbeing import WellbeingCardSelection
 
 __all__ = [
     "User",
@@ -23,4 +24,5 @@ __all__ = [
     "RiskAlert",
     "AuditLog",
     "SystemSetting",
+    "WellbeingCardSelection",
 ]

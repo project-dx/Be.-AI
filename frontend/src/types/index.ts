@@ -348,3 +348,21 @@ export interface MonthlyReport {
   error_message: string | null
   created_at: string
 }
+
+// --- ウェルビーイングカード ---
+export interface WellbeingCard {
+  id: string
+  label: string
+  category: 'self' | 'people' | 'world'
+  description: string
+}
+
+export interface WellbeingSelection {
+  id: number
+  user_id: number
+  selection_date: string
+  card_ids: string[]
+  note: string | null
+  created_at: string
+  updated_at: string
+}

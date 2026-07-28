@@ -15,6 +15,8 @@ import type {
   SupportPlan,
   User,
   UserDashboard,
+  WellbeingCard,
+  WellbeingSelection,
 } from '../types'
 
 const TOKEN_KEY = 'becolorful_access_token'
@@ -217,6 +219,15 @@ export const monthlyReportsApi = {
     api.get<MonthlyReport>('/monthly-reports/latest', { params: { year_month: yearMonth } }).then((r) => r.data),
   generate: (yearMonth: string) =>
     api.post<MonthlyReport>('/monthly-reports', { year_month: yearMonth }).then((r) => r.data),
+}
+
+// --- ウェルビーイングカード ---
+export const wellbeingApi = {
+  cards: () => api.get<WellbeingCard[]>('/wellbeing-cards').then((r) => r.data),
+  selections: (userId: number, limit = 30) =>
+    api.get<WellbeingSelection[]>(`/users/${userId}/wellbeing-selections`, { params: { limit } }).then((r) => r.data),
+  save: (userId: number, body: { card_ids: string[]; note?: string; selection_date?: string }) =>
+    api.post<WellbeingSelection>(`/users/${userId}/wellbeing-selections`, body).then((r) => r.data),
 }
 
 // --- 監査ログ・設定 ---

@@ -14,6 +14,7 @@ import MyReportsPage from './pages/MyReportsPage'
 import GoalsPage from './pages/GoalsPage'
 import RiskAlertsPage from './pages/RiskAlertsPage'
 import MonthlyReportPage from './pages/MonthlyReportPage'
+import WellbeingCardsPage from './pages/WellbeingCardsPage'
 import AccountsPage from './pages/AccountsPage'
 import AuditLogsPage from './pages/AuditLogsPage'
 import SettingsPage from './pages/SettingsPage'
@@ -74,6 +75,14 @@ export default function App() {
               element={
                 <RequireAuth roles={['user']}>
                   <GoalsPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/wellbeing-cards"
+              element={
+                <RequireAuth roles={['user']}>
+                  <WellbeingCardsPage />
                 </RequireAuth>
               }
             />
