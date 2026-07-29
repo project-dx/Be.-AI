@@ -146,6 +146,7 @@ export const staffReportsApi = {
   listAll: (params?: {
     urgency?: string
     user_id?: number
+    staff_id?: number
     date_from?: string
     date_to?: string
     limit?: number

@@ -54,9 +54,10 @@ export default function StaffReportsListPage() {
   const [mode, setMode] = useState<'calendar' | 'list'>('calendar')
   const [yearMonth, setYearMonth] = useState(currentYearMonth())
   const [reports, setReports] = useState<StaffReport[]>([])
-  const [members, setMembers] = useState<{ id: number; name: string }[]>([])
+  /** 記録を書いたスタッフの一覧（この画面は「誰が書いた日報か」で見る） */
+  const [staffMembers, setStaffMembers] = useState<{ id: number; name: string }[]>([])
   const [urgency, setUrgency] = useState<'' | Urgency>('')
-  const [userId, setUserId] = useState<number | ''>('')
+  const [staffId, setStaffId] = useState<number | ''>('')
   const [openId, setOpenId] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +70,7 @@ export default function StaffReportsListPage() {
     staffReportsApi
       .listAll({
         urgency: isCalendar ? undefined : urgency || undefined,
-        user_id: userId === '' ? undefined : Number(userId),
+        staff_id: staffId === '' ? undefined : Number(staffId),
         date_from: isCalendar ? `${yearMonth}-01` : undefined,
         date_to: isCalendar ? toISO(days[days.length - 1]) : undefined,
         limit: 500,
@@ -77,26 +78,25 @@ export default function StaffReportsListPage() {
       .then(setReports)
       .catch((e) => setError(errorMessage(e)))
       .finally(() => setLoading(false))
-  }, [mode, urgency, userId, yearMonth, days])
+  }, [mode, urgency, staffId, yearMonth, days])
 
   useEffect(load, [load])
 
-  // 絞り込みの候補は「実際に記録がある人」から作る
-  // （役割を変更した人の記録も選べるようにするため、利用者ロールに限定しない）
+  // 選択肢は「実際に記録を書いたスタッフ」から作る
   useEffect(() => {
     staffReportsApi
       .listAll({ limit: 500 })
       .then((all) => {
         const byId = new Map<number, string>()
         for (const r of all) {
-          if (!byId.has(r.user_id)) byId.set(r.user_id, r.user_name ?? `利用者#${r.user_id}`)
+          if (!byId.has(r.staff_id)) byId.set(r.staff_id, r.staff_name ?? `スタッフ#${r.staff_id}`)
         }
         const list = Array.from(byId, ([id, name]) => ({ id, name }))
-        setMembers(list)
-        // カレンダーは1人分を見る画面なので、未選択なら先頭の人を選んでおく
-        setUserId((prev) => (prev === '' && list.length > 0 ? list[0].id : prev))
+        setStaffMembers(list)
+        // カレンダーは1人分を見る画面なので、未選択なら先頭のスタッフを選んでおく
+        setStaffId((prev) => (prev === '' && list.length > 0 ? list[0].id : prev))
       })
-      .catch(() => setMembers([]))
+      .catch(() => setStaffMembers([]))
   }, [])
 
   /** 日付ごとの記録（1日に複数ある場合もまとめて持つ） */
@@ -110,7 +110,7 @@ export default function StaffReportsListPage() {
     return map
   }, [reports])
 
-  const selectedName = members.find((m) => m.id === Number(userId))?.name
+  const selectedStaffName = staffMembers.find((m) => m.id === Number(staffId))?.name
 
   return (
     <div className="space-y-4">
@@ -139,17 +139,20 @@ export default function StaffReportsListPage() {
       {/* 絞り込み */}
       <Card>
         <div className="flex flex-wrap items-center gap-3">
-          <select
-            aria-label="利用者を選ぶ"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value === '' ? '' : Number(e.target.value))}
-            className="rounded-xl border border-line-strong bg-white px-3 py-1.5 text-sm focus:border-brand-sea focus:outline-none focus:ring-4 focus:ring-brand-sea/15"
-          >
-            {mode === 'list' && <option value="">すべての利用者</option>}
-            {members.map((m) => (
-              <option key={m.id} value={m.id}>{m.name}</option>
-            ))}
-          </select>
+          <label className="flex items-center gap-2 text-xs font-bold text-ink-soft">
+            記録したスタッフ
+            <select
+              aria-label="記録したスタッフを選ぶ"
+              value={staffId}
+              onChange={(e) => setStaffId(e.target.value === '' ? '' : Number(e.target.value))}
+              className="rounded-xl border border-line-strong bg-white px-3 py-1.5 text-sm font-normal focus:border-brand-sea focus:outline-none focus:ring-4 focus:ring-brand-sea/15"
+            >
+              {mode === 'list' && <option value="">すべてのスタッフ</option>}
+              {staffMembers.map((m) => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </label>
 
           {mode === 'calendar' ? (
             <div className="flex items-center gap-1.5">
@@ -193,9 +196,9 @@ export default function StaffReportsListPage() {
       ) : mode === 'calendar' ? (
         /* ===== 月間カレンダー（かべなしクラウドと同じ並び） ===== */
         <Card
-          title={`${yearMonth.replace('-', '年')}月 提供実績記録${selectedName ? ` ／ ${selectedName}さん` : ''}`}
+          title={`${yearMonth.replace('-', '年')}月 支援記録${selectedStaffName ? ` ／ ${selectedStaffName}さんが記録` : ''}`}
         >
-          {members.length === 0 ? (
+          {staffMembers.length === 0 ? (
             <EmptyState message="支援記録がまだありません" />
           ) : (
             <div className="overflow-x-auto">
@@ -250,9 +253,17 @@ export default function StaffReportsListPage() {
                                     : 'bg-brand-sun-soft'
                               }`}
                             >
-                              {r.staff_name && (
-                                <p className="mb-0.5 text-right text-[11px] text-ink-faint">（{r.staff_name}）</p>
-                              )}
+                              <p className="mb-1 flex flex-wrap items-center gap-2">
+                                <Link
+                                  to={`/users/${r.user_id}?tab=staff-reports`}
+                                  className="text-xs font-bold text-ink underline decoration-line-strong underline-offset-2 hover:decoration-brand-leaf"
+                                >
+                                  {r.user_name ?? `利用者#${r.user_id}`} さんへの支援
+                                </Link>
+                                {r.staff_name && (
+                                  <span className="ml-auto text-[11px] text-ink-faint">記録: {r.staff_name}</span>
+                                )}
+                              </p>
                               <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">
                                 {r.support_content ?? '（記録本文なし）'}
                               </p>

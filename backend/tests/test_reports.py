@@ -273,3 +273,21 @@ def test_staff_reports_filter_by_date_range(
     assert res.status_code == 200, res.text
     dates = sorted(r["report_date"] for r in res.json())
     assert dates == ["2026-06-01", "2026-06-15", "2026-06-30"]
+
+
+def test_staff_reports_filter_by_staff(
+    client: TestClient, member: User, other_member: User, staff: User, other_staff: User, admin: User
+) -> None:
+    """「誰が書いた日報か」でも絞り込める（スタッフ日報の画面で使う）"""
+    _make_staff_report(client, staff.email, member.id)
+    _make_staff_report(client, other_staff.email, other_member.id)
+    headers = login_headers(client, admin.email)
+
+    res = client.get(f"/api/staff-reports?staff_id={staff.id}", headers=headers)
+    assert res.status_code == 200, res.text
+    rows = res.json()
+    assert len(rows) == 1
+    assert rows[0]["staff_id"] == staff.id
+    assert rows[0]["staff_name"] == "スタッフA"
+    # 記録の対象者（利用者）も分かる
+    assert rows[0]["user_name"] == "利用者1"

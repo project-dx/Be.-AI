@@ -96,7 +96,8 @@ all_reports_router = APIRouter(prefix="/api/staff-reports", tags=["スタッフ�
 @all_reports_router.get("", response_model=list[StaffDailyReportOut])
 def list_all_staff_reports(
     urgency: str | None = Query(default=None, pattern=URGENCY_PATTERN),
-    user_id: int | None = Query(default=None),
+    user_id: int | None = Query(default=None, description="記録の対象者（利用者）で絞り込む"),
+    staff_id: int | None = Query(default=None, description="記録を書いたスタッフで絞り込む"),
     date_from: date | None = Query(default=None),
     date_to: date | None = Query(default=None),
     limit: int = Query(default=100, ge=1, le=500),
@@ -116,6 +117,8 @@ def list_all_staff_reports(
     if user_id is not None:
         check_user_access(db, current_user, user_id)
         query = query.filter(StaffDailyReport.user_id == user_id)
+    if staff_id is not None:
+        query = query.filter(StaffDailyReport.staff_id == staff_id)
     if urgency:
         query = query.filter(StaffDailyReport.urgency == urgency)
     if date_from:
