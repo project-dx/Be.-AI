@@ -1,5 +1,8 @@
 from datetime import date, timedelta
 
+from fastapi.testclient import TestClient
+
+from app.models import User
 from tests.conftest import add_report, login_headers
 
 TODAY = date.today()
@@ -157,4 +160,65 @@ def test_user_cannot_view_staff_reports(client, db, staff, member):
     client.post(f"/api/users/{member.id}/staff-reports", headers=staff_headers, json=STAFF_REPORT)
     member_headers = login_headers(client, "member@test.com")
     res = client.get(f"/api/users/{member.id}/staff-reports", headers=member_headers)
+    assert res.status_code == 403
+
+
+# ============ 全利用者横断のスタッフ日報一覧 ============
+def _make_staff_report(client: TestClient, staff_email: str, user_id: int, urgency: str = "normal") -> None:
+    res = client.post(
+        f"/api/users/{user_id}/staff-reports",
+        json={"report_date": date.today().isoformat(), "support_content": "面談を実施", "urgency": urgency},
+        headers=login_headers(client, staff_email),
+    )
+    assert res.status_code == 201, res.text
+
+
+def test_admin_sees_all_staff_reports(
+    client: TestClient, member: User, other_member: User, staff: User, other_staff: User, admin: User
+) -> None:
+    _make_staff_report(client, staff.email, member.id)
+    _make_staff_report(client, other_staff.email, other_member.id, urgency="urgent")
+
+    res = client.get("/api/staff-reports", headers=login_headers(client, admin.email))
+    assert res.status_code == 200, res.text
+    rows = res.json()
+    assert len(rows) == 2
+    # 一覧では利用者名とスタッフ名が付与される
+    assert {r["user_name"] for r in rows} == {"利用者1", "利用者2"}
+    assert all(r["staff_name"] for r in rows)
+
+
+def test_staff_sees_only_assigned_users_reports(
+    client: TestClient, member: User, other_member: User, staff: User, other_staff: User
+) -> None:
+    _make_staff_report(client, staff.email, member.id)
+    _make_staff_report(client, other_staff.email, other_member.id)
+
+    res = client.get("/api/staff-reports", headers=login_headers(client, staff.email))
+    assert res.status_code == 200
+    rows = res.json()
+    assert len(rows) == 1
+    assert rows[0]["user_id"] == member.id
+
+
+def test_staff_reports_filter_by_urgency_and_user(
+    client: TestClient, member: User, other_member: User, staff: User, other_staff: User, admin: User
+) -> None:
+    _make_staff_report(client, staff.email, member.id, urgency="urgent")
+    _make_staff_report(client, other_staff.email, other_member.id, urgency="normal")
+    headers = login_headers(client, admin.email)
+
+    res = client.get("/api/staff-reports?urgency=urgent", headers=headers)
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    assert res.json()[0]["urgency"] == "urgent"
+
+    res = client.get(f"/api/staff-reports?user_id={other_member.id}", headers=headers)
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    assert res.json()[0]["user_id"] == other_member.id
+
+
+def test_user_cannot_list_all_staff_reports(client: TestClient, member: User) -> None:
+    res = client.get("/api/staff-reports", headers=login_headers(client, member.email))
     assert res.status_code == 403

@@ -16,6 +16,7 @@ const navByRole: Record<string, NavItem[]> = {
   admin: [
     { to: '/dashboard', label: 'ダッシュボード', icon: '🏠', activeClass: 'bg-brand-pink-soft text-ink', dotClass: 'bg-brand-pink' },
     { to: '/users', label: '利用者一覧', icon: '👥', activeClass: 'bg-brand-coral-soft text-ink', dotClass: 'bg-brand-coral' },
+    { to: '/staff-reports', label: 'スタッフ日報', icon: '🖊️', activeClass: 'bg-brand-sea-soft text-ink', dotClass: 'bg-brand-sea' },
     { to: '/risk-alerts', label: 'リスクアラート', icon: '🔔', activeClass: 'bg-brand-sun-soft text-ink', dotClass: 'bg-brand-sun' },
     { to: '/monthly-report', label: '月次レポート', icon: '📊', activeClass: 'bg-brand-leaf-soft text-ink', dotClass: 'bg-brand-leaf' },
     { to: '/accounts', label: 'アカウント管理', icon: '🗝️', activeClass: 'bg-brand-leaf-soft text-ink', dotClass: 'bg-brand-leaf' },
@@ -25,6 +26,7 @@ const navByRole: Record<string, NavItem[]> = {
   staff: [
     { to: '/dashboard', label: 'ダッシュボード', icon: '🏠', activeClass: 'bg-brand-pink-soft text-ink', dotClass: 'bg-brand-pink' },
     { to: '/users', label: '担当利用者', icon: '👥', activeClass: 'bg-brand-coral-soft text-ink', dotClass: 'bg-brand-coral' },
+    { to: '/staff-reports', label: 'スタッフ日報', icon: '🖊️', activeClass: 'bg-brand-sea-soft text-ink', dotClass: 'bg-brand-sea' },
     { to: '/risk-alerts', label: 'リスクアラート', icon: '🔔', activeClass: 'bg-brand-sun-soft text-ink', dotClass: 'bg-brand-sun' },
     { to: '/monthly-report', label: '月次レポート', icon: '📊', activeClass: 'bg-brand-leaf-soft text-ink', dotClass: 'bg-brand-leaf' },
   ],

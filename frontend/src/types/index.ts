@@ -58,6 +58,7 @@ export interface StaffReport {
   user_id: number
   staff_id: number
   staff_name: string | null
+  user_name?: string | null
   report_date: string
   support_minutes: number | null
   support_content: string | null

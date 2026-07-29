@@ -127,3 +127,4 @@ class StaffDailyReportOut(StaffDailyReportBase):
     created_at: datetime
     updated_at: datetime
     staff_name: str | None = None
+    user_name: str | None = None  # 一覧で利用者名を表示するために付与

@@ -4,7 +4,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import check_user_access, require_staff_or_admin
 from app.models import Profile, StaffDailyReport, User
-from app.schemas.report import StaffDailyReportCreate, StaffDailyReportOut, StaffDailyReportUpdate
+from app.schemas.report import (
+    URGENCY_PATTERN,
+    StaffDailyReportCreate,
+    StaffDailyReportOut,
+    StaffDailyReportUpdate,
+)
 from app.services.audit import record_audit
 from app.services.risk import evaluate_staff_report_risk
 
@@ -80,3 +85,50 @@ def update_staff_report(
     db.commit()
     db.refresh(report)
     return _to_out(db, report)
+
+
+# --- 全利用者を横断したスタッフ日報の一覧（左メニュー「スタッフ日報」用） ---
+all_reports_router = APIRouter(prefix="/api/staff-reports", tags=["スタッフ日報"])
+
+
+@all_reports_router.get("", response_model=list[StaffDailyReportOut])
+def list_all_staff_reports(
+    urgency: str | None = Query(default=None, pattern=URGENCY_PATTERN),
+    user_id: int | None = Query(default=None),
+    limit: int = Query(default=100, ge=1, le=500),
+    current_user: User = Depends(require_staff_or_admin),
+    db: Session = Depends(get_db),
+) -> list[StaffDailyReportOut]:
+    """管理者は全件、スタッフは担当利用者の記録のみを返す。"""
+    query = db.query(StaffDailyReport)
+
+    if current_user.role == "staff":
+        assigned_ids = [
+            p.user_id
+            for p in db.query(Profile).filter(Profile.assigned_staff_id == current_user.id).all()
+        ]
+        query = query.filter(StaffDailyReport.user_id.in_(assigned_ids or [-1]))
+
+    if user_id is not None:
+        check_user_access(db, current_user, user_id)
+        query = query.filter(StaffDailyReport.user_id == user_id)
+    if urgency:
+        query = query.filter(StaffDailyReport.urgency == urgency)
+
+    reports = (
+        query.order_by(StaffDailyReport.report_date.desc(), StaffDailyReport.id.desc())
+        .limit(limit)
+        .all()
+    )
+
+    # 利用者名・スタッフ名をまとめて引く（N+1を避ける）
+    profiles = db.query(Profile).all()
+    name_by_user_id = {p.user_id: p.display_name for p in profiles}
+
+    result = []
+    for r in reports:
+        out = StaffDailyReportOut.model_validate(r)
+        out.staff_name = name_by_user_id.get(r.staff_id)
+        out.user_name = name_by_user_id.get(r.user_id)
+        result.append(out)
+    return result
