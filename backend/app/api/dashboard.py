@@ -17,7 +17,9 @@ from app.models import (
     SupportPlan,
     User,
     UserDailyReport,
+    WellbeingCardSelection,
 )
+from app.services.wellbeing_cards import CARD_LABELS
 
 router = APIRouter(prefix="/api/dashboard", tags=["ダッシュボード"])
 
@@ -224,6 +226,15 @@ def staff_dashboard(
     )
     name_by_id = {p.user_id: p.display_name for p in profiles}
 
+    # 担当利用者が直近に選んだウェルビーイングカード
+    recent_selections = (
+        db.query(WellbeingCardSelection)
+        .filter(WellbeingCardSelection.user_id.in_(user_ids or [-1]))
+        .order_by(WellbeingCardSelection.selection_date.desc(), WellbeingCardSelection.updated_at.desc())
+        .limit(20)
+        .all()
+    )
+
     return {
         "summary": {
             "assigned_users": len(user_ids),
@@ -262,6 +273,20 @@ def staff_dashboard(
                 "support_content": r.support_content,
             }
             for r in urgent_reports
+        ],
+        "wellbeing_selections": [
+            {
+                "id": s.id,
+                "user_id": s.user_id,
+                "user_name": name_by_id.get(s.user_id),
+                "selection_date": s.selection_date.isoformat(),
+                "cards": [
+                    {"id": cid, "label": CARD_LABELS.get(cid, cid)} for cid in (s.card_ids or [])
+                ],
+                "note": s.note,
+                "updated_at": s.updated_at.isoformat(),
+            }
+            for s in recent_selections
         ],
     }
 
@@ -319,6 +344,14 @@ def admin_dashboard(
     for plan in db.query(SupportPlan).all():
         plan_counts[plan.status] = plan_counts.get(plan.status, 0) + 1
 
+    # 直近に選ばれたウェルビーイングカード（誰がいつどの3枚を選んだか）
+    recent_selections = (
+        db.query(WellbeingCardSelection)
+        .order_by(WellbeingCardSelection.selection_date.desc(), WellbeingCardSelection.updated_at.desc())
+        .limit(20)
+        .all()
+    )
+
     return {
         "summary": {
             "total_users": len(active_members),
@@ -341,5 +374,19 @@ def admin_dashboard(
                 "created_at": a.created_at.isoformat(),
             }
             for a in open_alerts[:20]
+        ],
+        "wellbeing_selections": [
+            {
+                "id": s.id,
+                "user_id": s.user_id,
+                "user_name": name_by_id.get(s.user_id),
+                "selection_date": s.selection_date.isoformat(),
+                "cards": [
+                    {"id": cid, "label": CARD_LABELS.get(cid, cid)} for cid in (s.card_ids or [])
+                ],
+                "note": s.note,
+                "updated_at": s.updated_at.isoformat(),
+            }
+            for s in recent_selections
         ],
     }

@@ -292,6 +292,7 @@ export interface StaffDashboard {
     report_date: string
     support_content: string | null
   }[]
+  wellbeing_selections: DashboardWellbeingSelection[]
 }
 
 export interface AdminDashboard {
@@ -306,6 +307,7 @@ export interface AdminDashboard {
   input_rate_trend: { date: string; rate: number }[]
   plan_status_counts: Record<string, number>
   alerts: StaffDashboard['alerts']
+  wellbeing_selections: DashboardWellbeingSelection[]
 }
 
 // --- 月次レポート ---
@@ -423,5 +425,16 @@ export interface MonitoringEvaluation {
   ai_generated: boolean
   model_name: string | null
   created_at: string
+  updated_at: string
+}
+
+/** ダッシュボードに表示するウェルビーイングカード選択（誰が・いつ・どの3枚） */
+export interface DashboardWellbeingSelection {
+  id: number
+  user_id: number
+  user_name: string | null
+  selection_date: string
+  cards: { id: string; label: string }[]
+  note: string | null
   updated_at: string
 }

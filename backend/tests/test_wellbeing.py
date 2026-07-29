@@ -74,3 +74,38 @@ def test_assigned_staff_can_view(client: TestClient, member: User, staff: User) 
     res = client.get(f"/api/users/{member.id}/wellbeing-selections", headers=staff_headers)
     assert res.status_code == 200
     assert len(res.json()) == 1
+
+
+def test_admin_dashboard_shows_who_selected_what(client: TestClient, member: User, admin: User) -> None:
+    """管理者ダッシュボードで「誰が・いつ・どの3枚を選んだか」が確認できる"""
+    client.post(f"/api/users/{member.id}/wellbeing-selections",
+                json={"card_ids": THREE, "note": "今週の気持ち"},
+                headers=login_headers(client, member.email))
+
+    res = client.get("/api/dashboard/admin", headers=login_headers(client, admin.email))
+    assert res.status_code == 200, res.text
+    selections = res.json()["wellbeing_selections"]
+    assert len(selections) == 1
+    row = selections[0]
+    assert row["user_name"] == "利用者1"
+    assert row["selection_date"]
+    assert row["updated_at"]
+    assert [c["id"] for c in row["cards"]] == THREE
+    assert [c["label"] for c in row["cards"]] == ["感謝", "成長", "平和"]
+    assert row["note"] == "今週の気持ち"
+
+
+def test_staff_dashboard_shows_only_assigned_users(
+    client: TestClient, member: User, other_member: User, staff: User
+) -> None:
+    """スタッフのダッシュボードには担当利用者の選択のみ表示される"""
+    client.post(f"/api/users/{member.id}/wellbeing-selections", json={"card_ids": THREE},
+                headers=login_headers(client, member.email))
+    client.post(f"/api/users/{other_member.id}/wellbeing-selections", json={"card_ids": THREE},
+                headers=login_headers(client, other_member.email))
+
+    res = client.get("/api/dashboard/staff", headers=login_headers(client, staff.email))
+    assert res.status_code == 200
+    selections = res.json()["wellbeing_selections"]
+    assert len(selections) == 1
+    assert selections[0]["user_id"] == member.id

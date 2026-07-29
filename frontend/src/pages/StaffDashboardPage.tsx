@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { dashboardApi, errorMessage, risksApi } from '../services/api'
 import { Badge, Card, EmptyState, ErrorMessage, Loading, ScoreCard } from '../components/ui'
+import { WellbeingSelectionList } from '../components/WellbeingSelectionList'
 import { alertTypeLabels, formatDate, formatDateTime, stressLabels } from '../utils/labels'
 import type { StaffDashboard } from '../types'
 
@@ -94,6 +95,13 @@ export default function StaffDashboardPage() {
       </Card>
 
       {/* 担当利用者一覧 */}
+      <Card title="🌈 最近選ばれたウェルビーイングカード" accent="text-brand-plum">
+        <p className="mb-3 text-xs text-ink-soft">
+          担当利用者が「いま大切にしたいこと」として選んだ3枚です
+        </p>
+        <WellbeingSelectionList selections={data.wellbeing_selections ?? []} />
+      </Card>
+
       <Card title="👥 担当利用者の状況">
         {data.users.length === 0 ? (
           <EmptyState message="担当利用者が割り当てられていません" />

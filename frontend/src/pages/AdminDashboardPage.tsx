@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { dashboardApi, errorMessage, risksApi } from '../services/api'
 import { Badge, Card, EmptyState, ErrorMessage, Loading, ScoreCard } from '../components/ui'
 import { chartColors, TrendLineChart } from '../components/charts'
+import { WellbeingSelectionList } from '../components/WellbeingSelectionList'
 import { alertTypeLabels, formatDateTime, planStatusLabels } from '../utils/labels'
 import type { AdminDashboard, PlanStatus } from '../types'
 
@@ -67,6 +68,13 @@ export default function AdminDashboardPage() {
           )}
         </Card>
       </div>
+
+      <Card title="🌈 最近選ばれたウェルビーイングカード" accent="text-brand-plum">
+        <p className="mb-3 text-xs text-ink-soft">
+          利用者が「いま大切にしたいこと」として選んだ3枚です。名前をクリックすると全履歴を確認できます
+        </p>
+        <WellbeingSelectionList selections={data.wellbeing_selections ?? []} />
+      </Card>
 
       <Card title="🔔 リスクアラート（全事業所）" accent="text-amber-700">
         {data.alerts.length === 0 ? (
