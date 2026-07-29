@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
@@ -95,6 +97,8 @@ all_reports_router = APIRouter(prefix="/api/staff-reports", tags=["スタッフ�
 def list_all_staff_reports(
     urgency: str | None = Query(default=None, pattern=URGENCY_PATTERN),
     user_id: int | None = Query(default=None),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
     limit: int = Query(default=100, ge=1, le=500),
     current_user: User = Depends(require_staff_or_admin),
     db: Session = Depends(get_db),
@@ -114,6 +118,10 @@ def list_all_staff_reports(
         query = query.filter(StaffDailyReport.user_id == user_id)
     if urgency:
         query = query.filter(StaffDailyReport.urgency == urgency)
+    if date_from:
+        query = query.filter(StaffDailyReport.report_date >= date_from)
+    if date_to:
+        query = query.filter(StaffDailyReport.report_date <= date_to)
 
     reports = (
         query.order_by(StaffDailyReport.report_date.desc(), StaffDailyReport.id.desc())

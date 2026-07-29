@@ -143,8 +143,13 @@ export const staffReportsApi = {
   update: (userId: number, reportId: number, body: Record<string, unknown>) =>
     api.patch<StaffReport>(`/users/${userId}/staff-reports/${reportId}`, body).then((r) => r.data),
   /** 全利用者を横断した一覧（管理者は全件・スタッフは担当分のみ） */
-  listAll: (params?: { urgency?: string; user_id?: number; limit?: number }) =>
-    api.get<StaffReport[]>('/staff-reports', { params }).then((r) => r.data),
+  listAll: (params?: {
+    urgency?: string
+    user_id?: number
+    date_from?: string
+    date_to?: string
+    limit?: number
+  }) => api.get<StaffReport[]>('/staff-reports', { params }).then((r) => r.data),
 }
 
 // --- スコア ---

@@ -251,3 +251,25 @@ def test_staff_reports_never_exposed_to_user_role(
 
     assert client.get("/api/staff-reports", headers=headers).status_code == 403
     assert client.get(f"/api/staff-reports?user_id={member.id}", headers=headers).status_code == 403
+
+
+def test_staff_reports_filter_by_date_range(
+    client: TestClient, db: Session, member: User, staff: User, admin: User
+) -> None:
+    """カレンダー表示用に、月の範囲で絞り込める"""
+    from app.models import StaffDailyReport
+
+    for d in [date(2026, 5, 31), date(2026, 6, 1), date(2026, 6, 15), date(2026, 6, 30), date(2026, 7, 1)]:
+        db.add(
+            StaffDailyReport(
+                user_id=member.id, staff_id=staff.id, report_date=d,
+                support_content=f"{d}の記録", urgency="normal",
+            )
+        )
+    db.commit()
+
+    headers = login_headers(client, admin.email)
+    res = client.get("/api/staff-reports?date_from=2026-06-01&date_to=2026-06-30", headers=headers)
+    assert res.status_code == 200, res.text
+    dates = sorted(r["report_date"] for r in res.json())
+    assert dates == ["2026-06-01", "2026-06-15", "2026-06-30"]
