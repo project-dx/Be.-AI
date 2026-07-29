@@ -7,11 +7,12 @@ import { Field, inputClass, PrimaryButton } from '../components/form'
 import { Badge, Card, ErrorMessage, Loading } from '../components/ui'
 import type { User } from '../types'
 
-const roleLabels: Record<string, { label: string; className: string }> = {
-  admin: { label: '管理者', className: 'bg-violet-100 text-violet-800' },
-  staff: { label: 'スタッフ', className: 'bg-sky-100 text-sky-800' },
-  user: { label: '利用者', className: 'bg-brand-leaf-soft text-emerald-800' },
-}
+/** 一覧をロールごとに分けて表示する（上から利用者 → スタッフ → 管理者） */
+const ROLE_SECTIONS: { role: string; title: string; icon: string; accent: string }[] = [
+  { role: 'user', title: '利用者', icon: '🙂', accent: 'text-brand-leaf' },
+  { role: 'staff', title: 'スタッフ', icon: '🧑‍💼', accent: 'text-brand-sea' },
+  { role: 'admin', title: '管理者', icon: '🗝️', accent: 'text-brand-plum' },
+]
 
 export default function AccountsPage() {
   const [users, setUsers] = useState<User[] | null>(null)
@@ -70,6 +71,9 @@ export default function AccountsPage() {
 
   if (!users) return <Loading />
   const staffList = users.filter((u) => u.role === 'staff' && u.is_active)
+  const staffNameById = new Map(
+    users.filter((u) => u.role === 'staff').map((u) => [u.id, u.profile?.display_name ?? u.email]),
+  )
   const role = watch('role')
 
   return (
@@ -118,47 +122,60 @@ export default function AccountsPage() {
         </form>
       </Card>
 
-      <Card title="👥 アカウント一覧">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-sm">
-            <thead>
-              <tr className="border-b border-line text-left text-xs text-ink-faint">
-                <th className="py-2 pr-3 font-bold">表示名</th>
-                <th className="py-2 pr-3 font-bold">メール</th>
-                <th className="py-2 pr-3 font-bold">ロール</th>
-                <th className="py-2 pr-3 font-bold">状態</th>
-                <th className="py-2 font-bold">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => {
-                const r = roleLabels[u.role]
-                return (
-                  <tr key={u.id} className="border-b border-line">
-                    <td className="py-2.5 pr-3 font-bold text-ink">{u.profile?.display_name ?? '-'}</td>
-                    <td className="py-2.5 pr-3 text-ink-soft">{u.email}</td>
-                    <td className="py-2.5 pr-3"><Badge label={r.label} className={r.className} /></td>
-                    <td className="py-2.5 pr-3">
-                      <Badge
-                        label={u.is_active ? '有効' : '無効'}
-                        className={u.is_active ? 'bg-brand-leaf-soft text-emerald-800' : 'bg-paper-deep text-ink-soft'}
-                      />
-                    </td>
-                    <td className="py-2.5">
-                      <button
-                        onClick={() => toggleActive(u)}
-                        className="rounded-lg border border-line px-3 py-1 text-xs text-ink-soft hover:bg-paper"
-                      >
-                        {u.is_active ? '無効化' : '有効化'}
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+      {/* ロールごとに分けて表示する（混在すると担当関係が分かりにくいため） */}
+      {ROLE_SECTIONS.map((section) => {
+        const rows = users.filter((u) => u.role === section.role)
+        return (
+          <Card key={section.role} title={`${section.icon} ${section.title}（${rows.length}名）`} accent={section.accent}>
+            {rows.length === 0 ? (
+              <p className="text-sm text-ink-soft">まだ登録がありません</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[560px] text-sm">
+                  <thead>
+                    <tr className="border-b border-line text-left text-xs text-ink-faint">
+                      <th className="py-2 pr-3 font-bold">表示名</th>
+                      <th className="py-2 pr-3 font-bold">メール</th>
+                      {section.role === 'user' && <th className="py-2 pr-3 font-bold">担当スタッフ</th>}
+                      <th className="py-2 pr-3 font-bold">状態</th>
+                      <th className="py-2 font-bold">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((u) => (
+                      <tr key={u.id} className="border-b border-line">
+                        <td className="py-2.5 pr-3 font-bold text-ink">{u.profile?.display_name ?? '-'}</td>
+                        <td className="py-2.5 pr-3 text-ink-soft">{u.email}</td>
+                        {section.role === 'user' && (
+                          <td className="py-2.5 pr-3 text-ink-soft">
+                            {u.profile?.assigned_staff_id
+                              ? staffNameById.get(u.profile.assigned_staff_id) ?? '-'
+                              : <span className="text-ink-faint">未割り当て</span>}
+                          </td>
+                        )}
+                        <td className="py-2.5 pr-3">
+                          <Badge
+                            label={u.is_active ? '有効' : '無効'}
+                            className={u.is_active ? 'bg-brand-leaf-soft text-emerald-800' : 'bg-paper-deep text-ink-soft'}
+                          />
+                        </td>
+                        <td className="py-2.5">
+                          <button
+                            onClick={() => toggleActive(u)}
+                            className="rounded-lg border border-line px-3 py-1 text-xs text-ink-soft hover:bg-paper"
+                          >
+                            {u.is_active ? '無効化' : '有効化'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        )
+      })}
     </div>
   )
 }
