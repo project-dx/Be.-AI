@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app.models import User
 from tests.conftest import add_report, login_headers
@@ -222,3 +223,31 @@ def test_staff_reports_filter_by_urgency_and_user(
 def test_user_cannot_list_all_staff_reports(client: TestClient, member: User) -> None:
     res = client.get("/api/staff-reports", headers=login_headers(client, member.email))
     assert res.status_code == 403
+
+
+def test_staff_report_visible_even_if_target_became_staff(
+    client: TestClient, db: Session, member: User, staff: User, admin: User
+) -> None:
+    """記録の対象者が後からスタッフ役割に変わっても、記録は一覧に残り続ける"""
+    _make_staff_report(client, staff.email, member.id)
+
+    member.role = "staff"
+    db.commit()
+
+    res = client.get("/api/staff-reports", headers=login_headers(client, admin.email))
+    assert res.status_code == 200
+    rows = res.json()
+    assert len(rows) == 1
+    assert rows[0]["user_id"] == member.id
+    assert rows[0]["user_name"] == "利用者1"
+
+
+def test_staff_reports_never_exposed_to_user_role(
+    client: TestClient, member: User, staff: User
+) -> None:
+    """利用者ロールには支援記録の一覧を見せない"""
+    _make_staff_report(client, staff.email, member.id)
+    headers = login_headers(client, member.email)
+
+    assert client.get("/api/staff-reports", headers=headers).status_code == 403
+    assert client.get(f"/api/staff-reports?user_id={member.id}", headers=headers).status_code == 403

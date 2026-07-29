@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { errorMessage, staffReportsApi, usersApi } from '../services/api'
+import { errorMessage, staffReportsApi } from '../services/api'
 import { Badge, Card, EmptyState, ErrorMessage, Loading } from '../components/ui'
 import { formatDate, urgencyLabels } from '../utils/labels'
 import type { StaffReport, Urgency } from '../types'
@@ -48,16 +48,18 @@ export default function StaffReportsListPage() {
 
   useEffect(load, [load])
 
+  // 絞り込みの候補は「実際に記録がある人」から作る
+  // （役割を変更した人の記録も選べるようにするため、利用者ロールに限定しない）
   useEffect(() => {
-    usersApi
-      .list()
-      .then((list) =>
-        setMembers(
-          list
-            .filter((u) => u.role === 'user' && u.is_active)
-            .map((u) => ({ id: u.id, name: u.profile?.display_name ?? u.email })),
-        ),
-      )
+    staffReportsApi
+      .listAll({ limit: 500 })
+      .then((all) => {
+        const byId = new Map<number, string>()
+        for (const r of all) {
+          if (!byId.has(r.user_id)) byId.set(r.user_id, r.user_name ?? `利用者#${r.user_id}`)
+        }
+        setMembers(Array.from(byId, ([id, name]) => ({ id, name })))
+      })
       .catch(() => setMembers([]))
   }, [])
 
