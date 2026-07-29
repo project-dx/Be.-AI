@@ -1,18 +1,34 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { dashboardApi, errorMessage, risksApi } from '../services/api'
+import { dashboardApi, errorMessage, risksApi, usersApi } from '../services/api'
 import { Badge, Card, EmptyState, ErrorMessage, Loading, ScoreCard } from '../components/ui'
 import { chartColors, TrendLineChart } from '../components/charts'
 import { WellbeingSelectionList } from '../components/WellbeingSelectionList'
+import { TheoryAnalysisCard } from '../components/TheoryAnalysisCard'
+import { MonitoringEvaluationCard } from '../components/MonitoringEvaluationCard'
 import { alertTypeLabels, formatDateTime, planStatusLabels } from '../utils/labels'
 import type { AdminDashboard, PlanStatus } from '../types'
 
 export default function AdminDashboardPage() {
   const [data, setData] = useState<AdminDashboard | null>(null)
+  const [members, setMembers] = useState<{ user_id: number; display_name: string }[]>([])
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(() => {
     dashboardApi.admin().then(setData).catch((e) => setError(errorMessage(e)))
+  }, [])
+
+  useEffect(() => {
+    usersApi
+      .list()
+      .then((list) =>
+        setMembers(
+          list
+            .filter((u) => u.role === 'user' && u.is_active)
+            .map((u) => ({ user_id: u.id, display_name: u.profile?.display_name ?? u.email })),
+        ),
+      )
+      .catch(() => setMembers([]))
   }, [])
 
   useEffect(load, [load])
@@ -68,6 +84,9 @@ export default function AdminDashboardPage() {
           )}
         </Card>
       </div>
+
+      <TheoryAnalysisCard users={members} />
+      <MonitoringEvaluationCard users={members} />
 
       <Card title="🌈 最近選ばれたウェルビーイングカード" accent="text-brand-plum">
         <p className="mb-3 text-xs text-ink-soft">

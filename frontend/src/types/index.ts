@@ -415,8 +415,11 @@ export interface MonitoringEvaluation {
     period_months: number
     report_count: number
     score_count: number
+    span_days?: number
+    staff_report_count?: number
     scores: Record<string, { label: string; before: number | null; after: number | null; diff?: number }>
   } | null
+  overall_evaluation: string | null
   achievements: string | null
   challenges: string | null
   plan_adjustments: string | null

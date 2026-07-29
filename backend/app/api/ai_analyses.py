@@ -58,7 +58,10 @@ def run_analysis(
     db: Session = Depends(get_db),
 ) -> AiAnalysisOut:
     check_user_access(db, current_user, user_id)
-    period_start, period_end = default_period(body.period_days)
+    if body.period_start and body.period_end:
+        period_start, period_end = body.period_start, body.period_end
+    else:
+        period_start, period_end = default_period(body.period_days)
     context = build_analysis_context(db, user_id, period_start, period_end)
 
     if context["report_count"] == 0:

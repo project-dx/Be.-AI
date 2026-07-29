@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 # --- 初期アセスメント ---
@@ -52,9 +52,24 @@ class PyramidOut(PyramidUpsert):
 # --- モニタリング評価 ---
 class MonitoringGenerateRequest(BaseModel):
     period_months: int = Field(default=6, ge=1, le=12)
+    # カレンダーで期間を選ぶ場合はこちらを使う（両方指定されたときはこちらを優先）
+    period_start: date | None = None
+    period_end: date | None = None
+
+    @model_validator(mode="after")
+    def validate_period(self) -> "MonitoringGenerateRequest":
+        if (self.period_start is None) != (self.period_end is None):
+            raise ValueError("期間は開始日と終了日の両方を指定してください")
+        if self.period_start and self.period_end:
+            if self.period_start > self.period_end:
+                raise ValueError("開始日は終了日より前の日付にしてください")
+            if (self.period_end - self.period_start).days > 730:
+                raise ValueError("期間は2年以内で指定してください")
+        return self
 
 
 class MonitoringUpdate(BaseModel):
+    overall_evaluation: str | None = Field(default=None, max_length=1000)
     achievements: str | None = None
     challenges: str | None = None
     plan_adjustments: str | None = None
@@ -71,6 +86,7 @@ class MonitoringOut(BaseModel):
     period_start: date
     period_end: date
     score_summary_json: dict[str, Any] | None
+    overall_evaluation: str | None
     achievements: str | None
     challenges: str | None
     plan_adjustments: str | None

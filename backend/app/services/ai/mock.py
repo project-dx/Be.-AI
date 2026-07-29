@@ -28,6 +28,10 @@ class MockAIService(AIService):
         avg_stress = stats.get("avg_stress_recent")
         avg_mood = stats.get("avg_mood")
         success_days = stats.get("success_experience_days", 0)
+        reports = context.get("daily_reports", [])
+        social_values = [r["social_level"] for r in reports if r.get("social_level") is not None]
+        avg_social = round(sum(social_values) / len(social_values), 1) if social_values else None
+        difficulty_days = sum(1 for r in reports if (r.get("difficulty") or "").strip())
 
         strengths: list[str] = []
         concerns: list[str] = []
@@ -180,11 +184,11 @@ class MockAIService(AIService):
             concerns=concerns,
             trend_analysis=trend,
             maslow_analysis=self._maslow(avg_sleep, avg_stress),
-            adler_analysis="できたことの記録を続けている点は貢献感・自己受容につながる行動と考えられます。評価ではなく「勇気づけ」の声かけが有効な可能性があります。",
+            adler_analysis=self._adler(success_days, avg_social),
             perma_analysis=self._perma(avg_mood, success_days),
-            abc_analysis="きっかけ（A）→行動（B）→結果（C）の記録がそろうと、負担が生じる場面の特定に役立ちます。困ったことが起きた前後の状況を記録できると分析精度が上がります。",
-            choice_theory_analysis="基本的欲求のうち「達成」「所属」に関する記録が中心です。楽しみに関する活動の記録が増えると、より正確な把握ができる可能性があります。",
-            behavioral_economics_analysis="大きな目標より「10分だけ」「1つだけ」の小さな行動目標（ナッジ）が習慣形成に有効と考えられます。実行意図（いつ・どこで・何を）を決めると実行率が上がる傾向があります。",
+            abc_analysis=self._abc(difficulty_days, success_days),
+            choice_theory_analysis=self._choice_theory(avg_social, success_days, avg_mood),
+            behavioral_economics_analysis=self._behavioral_economics(report_count, success_days),
             staff_recommendations=staff_recs[:5],
             user_recommendations=user_recs[:3],
             questions_for_staff=[r.questions[0] for r in staff_recs if r.questions][:3],
@@ -193,22 +197,100 @@ class MockAIService(AIService):
             data_limitations=limitations or ["本結果はモックAIによる参考情報です"],
         )
 
+    # --- 6つの理論による分析（各100文字程度） ---
+
     def _maslow(self, avg_sleep: float | None, avg_stress: float | None) -> str:
+        """マズローの5段階欲求: どの段階の欲求が満たされていないかを見る"""
         if avg_sleep is not None and avg_sleep < 6:
-            return "生理的欲求（睡眠）が十分に満たされていない可能性があります。まず睡眠の安定を優先した支援が有効と考えられます。"
+            return (
+                f"第1段階の生理的欲求に課題があります。平均睡眠{avg_sleep}時間と不足しており、"
+                "上位の欲求より先に休息の確保を優先する支援が有効と考えられます。"
+            )
         if avg_stress is not None and avg_stress >= 3.5:
-            return "安全欲求（安心できる環境）に関する負担がある可能性があります。安心して過ごせる場面を増やす支援の検討が必要です。"
-        return "生理的欲求・安全欲求は概ね満たされている傾向があります。所属・承認につながる活動（役割のある作業など）の充実が次の段階として考えられます。"
+            return (
+                f"第2段階の安全欲求に負担が見られます。ストレス平均{avg_stress}と高めで、"
+                "安心して過ごせる場面を増やすことが次の段階への土台になります。"
+            )
+        return (
+            "第1・2段階の生理的欲求と安全欲求は概ね満たされている傾向です。"
+            "第3・4段階の所属・承認欲求に向け、役割のある作業や称賛の機会が有効です。"
+        )
+
+    def _adler(self, success_days: int, avg_social: float | None) -> str:
+        """アドラー心理学: 勇気づけ・共同体感覚・貢献感"""
+        if success_days >= 3:
+            return (
+                f"できたことを{success_days}日分記録できており、自己受容が育っています。"
+                "結果ではなく取り組みに注目した勇気づけで、さらに貢献感を高められます。"
+            )
+        if avg_social is not None and avg_social <= 2.5:
+            return (
+                f"人との交流が平均{avg_social}と少なめで、共同体感覚を育てる機会が限られています。"
+                "誰かの役に立つ小さな役割を任せることが有効と考えられます。"
+            )
+        return (
+            "他者との関わりの中で役割を持てている傾向です。"
+            "評価ではなく勇気づけの声かけを続けることで、課題に自ら向き合う力が育ちます。"
+        )
 
     def _perma(self, avg_mood: float | None, success_days: int) -> str:
-        parts = []
-        if avg_mood is not None:
-            parts.append(f"P（前向きな感情）は気分平均{avg_mood}で推移しています")
+        """ポジティブ心理学(PERMA): 幸福の5要素"""
+        mood_part = f"P(前向きな感情)は気分平均{avg_mood}" if avg_mood is not None else "P(前向きな感情)は記録が不足"
+        if success_days >= 3:
+            return (
+                f"{mood_part}で推移し、A(達成)は成功体験{success_days}日分と強みです。"
+                "R(関係性)とM(意味)を高める機会をつくると幸福度全体が上がります。"
+            )
+        return (
+            f"{mood_part}で推移しています。A(達成)の記録が少ないため、"
+            "小さなできたことを言語化して残す習慣が幸福度の底上げにつながります。"
+        )
+
+    def _abc(self, difficulty_days: int, success_days: int) -> str:
+        """ABA(応用行動分析): A(先行事象)→B(行動)→C(結果)"""
+        if difficulty_days >= 3:
+            return (
+                f"困りごとの記録が{difficulty_days}日分あります。その直前の状況(A)を一緒に確認すると、"
+                "負担が生じる場面の共通点が見え、環境調整による予防が可能になります。"
+            )
         if success_days > 0:
-            parts.append(f"A（達成）は成功体験の記録が{success_days}日分あり、強みとなっています")
-        else:
-            parts.append("A（達成）に関する記録が少なく、小さな達成の記録を促すことが有効と考えられます")
-        return "。".join(parts) + "。"
+            return (
+                f"うまくいった行動(B)が{success_days}日分記録されています。"
+                "その直後に称賛(C)を返すことで望ましい行動が強化され、定着しやすくなります。"
+            )
+        return (
+            "きっかけ(A)→行動(B)→結果(C)の記録がそろうと分析精度が上がります。"
+            "できごとの前後の状況をあわせて記録できるよう促すことが有効です。"
+        )
+
+    def _choice_theory(self, avg_social: float | None, success_days: int, avg_mood: float | None) -> str:
+        """選択理論心理学: 5つの基本的欲求(生存・愛所属・力・自由・楽しみ)"""
+        if avg_social is not None and avg_social <= 2.5:
+            return (
+                f"「愛・所属」の欲求が満たされにくい状態です(交流平均{avg_social})。"
+                "本人が選べる形で人と関わる場を用意すると、内側からの動機が働きやすくなります。"
+            )
+        if success_days >= 3:
+            return (
+                "「力(達成)」の欲求が満たされています。"
+                "次は「楽しみ」「自由」の欲求に注目し、自分で選べる活動を増やすと満足感が広がります。"
+            )
+        return (
+            "「力(達成)」「愛・所属」に関する記録が中心です。"
+            "外からの指示ではなく本人が選ぶ場面を増やすことが、行動の継続につながります。"
+        )
+
+    def _behavioral_economics(self, report_count: int, success_days: int) -> str:
+        """行動経済学: ナッジ・現在バイアス・習慣化"""
+        if report_count >= 14:
+            return (
+                f"{report_count}日分の記録が続いており、習慣化ができています。"
+                "現状維持バイアスが良い方向に働くよう、今の記録の型は変えずに保つことが有効です。"
+            )
+        return (
+            "人は先の利益より目先の負担を重く感じます(現在バイアス)。"
+            "「10分だけ」「1つだけ」の小さな行動目標(ナッジ)と、いつ・どこでを決める工夫が有効です。"
+        )
 
     def generate_support_plan(self, context: dict[str, Any]) -> SupportPlanDraft:
         stats = context.get("stats", {})

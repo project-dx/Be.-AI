@@ -72,6 +72,7 @@ class MonitoringEvaluation(Base):
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
 
     score_summary_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)  # 期間のスコア推移（集計値）
+    overall_evaluation: Mapped[str | None] = mapped_column(Text)  # 総合評価（1000文字以内・期間全体のまとめ）
     achievements: Mapped[str | None] = mapped_column(Text)  # 達成できたこと
     challenges: Mapped[str | None] = mapped_column(Text)  # 残された課題
     plan_adjustments: Mapped[str | None] = mapped_column(Text)  # 支援計画の調整内容

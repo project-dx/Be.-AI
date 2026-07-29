@@ -185,3 +185,86 @@ def test_analysis_context_includes_assessment_and_vitals(
     assert context["assessment"]["herrmann_model"]["b_practical"] == 80
     assert context["pyramid"]["mission"] == PYRAMID_BODY["mission"]
     assert context["daily_reports"][0]["vitals"]["body_temperature"] == 36.4
+
+
+def test_monitoring_overall_evaluation_within_1000_chars(
+    client: TestClient, db: Session, member: User, staff: User
+) -> None:
+    """6か月分の記録をまとめた総合評価が1000文字以内で生成される"""
+    from app.models import StaffDailyReport
+
+    today = date.today()
+    for i in range(60):
+        db.add(
+            UserDailyReport(
+                user_id=member.id, report_date=today - timedelta(days=i * 3),
+                mood=4, sleep_hours=7.0, sleep_quality=4,
+                stress_level=2, fatigue_level=2, social_level=3,
+                success_experience="やりきれた" if i % 2 == 0 else None,
+                is_draft=False,
+            )
+        )
+    for i in range(20):
+        db.add(
+            StaffDailyReport(
+                user_id=member.id, staff_id=staff.id,
+                report_date=today - timedelta(days=i * 8),
+                support_content="面談を実施しました" if i % 3 else "欠席の連絡がありました",
+                urgency="urgent" if i == 0 else "normal",
+            )
+        )
+    db.commit()
+
+    headers = login_headers(client, staff.email)
+    res = client.post(
+        f"/api/users/{member.id}/monitoring-evaluations",
+        json={"period_months": 6},
+        headers=headers,
+    )
+    assert res.status_code == 201, res.text
+    overall = res.json()["overall_evaluation"]
+    assert overall
+    assert len(overall) <= 1000, f"{len(overall)}文字（1000文字以内を想定）"
+    # 6か月分の日報と支援記録の両方がまとめられている
+    assert "【対象期間】" in overall
+    assert "支援記録" in overall
+    assert "【次期に向けて】" in overall
+
+
+def test_monitoring_accepts_calendar_period(
+    client: TestClient, db: Session, member: User, staff: User
+) -> None:
+    """カレンダーで選んだ期間でモニタリング評価を作成できる"""
+    today = date.today()
+    for i in range(10):
+        db.add(
+            UserDailyReport(
+                user_id=member.id, report_date=today - timedelta(days=i),
+                mood=4, sleep_hours=7.0, is_draft=False,
+            )
+        )
+    db.commit()
+
+    headers = login_headers(client, staff.email)
+    start, end = (today - timedelta(days=9)).isoformat(), today.isoformat()
+    res = client.post(
+        f"/api/users/{member.id}/monitoring-evaluations",
+        json={"period_start": start, "period_end": end},
+        headers=headers,
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["period_start"] == start
+    assert body["period_end"] == end
+    assert body["score_summary_json"]["report_count"] == 10
+
+
+def test_monitoring_rejects_invalid_period(client: TestClient, member: User, staff: User) -> None:
+    headers = login_headers(client, staff.email)
+    today = date.today()
+    res = client.post(
+        f"/api/users/{member.id}/monitoring-evaluations",
+        json={"period_start": today.isoformat(), "period_end": (today - timedelta(days=5)).isoformat()},
+        headers=headers,
+    )
+    assert res.status_code == 422

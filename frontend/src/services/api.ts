@@ -165,6 +165,15 @@ export const analysesApi = {
         period_days: periodDays,
       })
       .then((r) => r.data),
+  /** カレンダーで選んだ期間で分析する */
+  runForPeriod: (userId: number, periodStart: string, periodEnd: string) =>
+    api
+      .post<AiAnalysis>(`/users/${userId}/ai-analyses`, {
+        analysis_type: 'daily_analysis',
+        period_start: periodStart,
+        period_end: periodEnd,
+      })
+      .then((r) => r.data),
 }
 
 // --- 個別支援計画 ---
@@ -252,6 +261,14 @@ export const monitoringApi = {
   generate: (userId: number, periodMonths = 6) =>
     api
       .post<MonitoringEvaluation>(`/users/${userId}/monitoring-evaluations`, { period_months: periodMonths })
+      .then((r) => r.data),
+  /** カレンダーで選んだ期間で評価を作成する */
+  generateForPeriod: (userId: number, periodStart: string, periodEnd: string) =>
+    api
+      .post<MonitoringEvaluation>(`/users/${userId}/monitoring-evaluations`, {
+        period_start: periodStart,
+        period_end: periodEnd,
+      })
       .then((r) => r.data),
   update: (userId: number, evaluationId: number, body: Partial<MonitoringEvaluation>) =>
     api

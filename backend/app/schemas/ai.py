@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class StaffRecommendation(BaseModel):
@@ -118,6 +118,20 @@ class MonthlyReportOut(BaseModel):
 class AiAnalysisRequest(BaseModel):
     analysis_type: str = Field(default="daily_analysis", pattern="^(daily_analysis|risk_review)$")
     period_days: int = Field(default=14, ge=3, le=90)
+    # カレンダーで期間を選ぶ場合はこちらを使う（両方指定されたときはこちらを優先）
+    period_start: date | None = None
+    period_end: date | None = None
+
+    @model_validator(mode="after")
+    def validate_period(self) -> "AiAnalysisRequest":
+        if (self.period_start is None) != (self.period_end is None):
+            raise ValueError("期間は開始日と終了日の両方を指定してください")
+        if self.period_start and self.period_end:
+            if self.period_start > self.period_end:
+                raise ValueError("開始日は終了日より前の日付にしてください")
+            if (self.period_end - self.period_start).days > 365:
+                raise ValueError("期間は1年以内で指定してください")
+        return self
 
 
 class AiAnalysisOut(BaseModel):

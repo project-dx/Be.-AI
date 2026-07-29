@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -8,6 +8,10 @@ from app.schemas.ai import AiAnalysisResult
 from app.services.ai.base import AIServiceError
 from app.services.ai.mock import MockAIService
 from app.services.ai.factory import get_ai_service
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from app.models import User
 from tests.conftest import add_week_reports, login_headers
 
 TODAY = date.today()
@@ -135,3 +139,77 @@ def test_analysis_requires_reports(client, db, staff, member):
                       json={"analysis_type": "daily_analysis", "period_days": 14})
     assert res.status_code == 422
     assert "日報" in res.json()["detail"]
+
+
+THEORY_FIELDS = [
+    "maslow_analysis",
+    "adler_analysis",
+    "perma_analysis",
+    "abc_analysis",
+    "choice_theory_analysis",
+    "behavioral_economics_analysis",
+]
+
+
+def test_all_six_theories_are_about_100_chars() -> None:
+    """6つの心理学の分析がすべて生成され、100文字程度に収まる"""
+    result = MockAIService().analyze_daily(make_context())
+    for field in THEORY_FIELDS:
+        text = getattr(result, field)
+        assert text, f"{field} が空です"
+        assert 40 <= len(text) <= 160, f"{field} は{len(text)}文字（100文字程度を想定）: {text}"
+
+
+def test_theories_reflect_input_data() -> None:
+    """入力データに応じて理論の記述が変わる（固定文ではない）"""
+    healthy = MockAIService().analyze_daily(make_context())
+    poor_sleep = MockAIService().analyze_daily(
+        make_context(stats={
+            "avg_sleep_recent": 4.5, "avg_sleep_earlier": 7.0,
+            "avg_stress_recent": 4.0, "avg_stress_earlier": 2.0,
+            "success_experience_days": 0, "avg_mood": 2.0,
+        })
+    )
+    assert healthy.maslow_analysis != poor_sleep.maslow_analysis
+    assert "4.5" in poor_sleep.maslow_analysis
+    assert "第1段階" in poor_sleep.maslow_analysis
+
+
+def test_analysis_accepts_explicit_period(client: TestClient, db: Session, member: User, staff: User) -> None:
+    """カレンダーで選んだ期間（開始日・終了日）で分析できる"""
+    add_week_reports(db, member.id, TODAY)
+    headers = login_headers(client, staff.email)
+    start, end = (TODAY - timedelta(days=6)).isoformat(), TODAY.isoformat()
+
+    res = client.post(
+        f"/api/users/{member.id}/ai-analyses",
+        json={"analysis_type": "daily_analysis", "period_start": start, "period_end": end},
+        headers=headers,
+    )
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["input_period_start"] == start
+    assert body["input_period_end"] == end
+    for field in THEORY_FIELDS:
+        assert body["result_json"][field]
+
+
+def test_analysis_rejects_invalid_period(client: TestClient, db: Session, member: User, staff: User) -> None:
+    add_week_reports(db, member.id, TODAY)
+    headers = login_headers(client, staff.email)
+
+    # 開始日が終了日より後
+    res = client.post(
+        f"/api/users/{member.id}/ai-analyses",
+        json={"period_start": TODAY.isoformat(), "period_end": (TODAY - timedelta(days=5)).isoformat()},
+        headers=headers,
+    )
+    assert res.status_code == 422
+
+    # 片方だけの指定
+    res = client.post(
+        f"/api/users/{member.id}/ai-analyses",
+        json={"period_start": TODAY.isoformat()},
+        headers=headers,
+    )
+    assert res.status_code == 422

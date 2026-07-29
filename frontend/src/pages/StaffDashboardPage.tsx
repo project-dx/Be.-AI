@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { dashboardApi, errorMessage, risksApi } from '../services/api'
 import { Badge, Card, EmptyState, ErrorMessage, Loading, ScoreCard } from '../components/ui'
 import { WellbeingSelectionList } from '../components/WellbeingSelectionList'
+import { TheoryAnalysisCard } from '../components/TheoryAnalysisCard'
+import { MonitoringEvaluationCard } from '../components/MonitoringEvaluationCard'
 import { alertTypeLabels, formatDate, formatDateTime, stressLabels } from '../utils/labels'
 import type { StaffDashboard } from '../types'
 
@@ -95,6 +97,9 @@ export default function StaffDashboardPage() {
       </Card>
 
       {/* 担当利用者一覧 */}
+      <TheoryAnalysisCard users={data.users.map((u) => ({ user_id: u.user_id, display_name: u.display_name }))} />
+      <MonitoringEvaluationCard users={data.users.map((u) => ({ user_id: u.user_id, display_name: u.display_name }))} />
+
       <Card title="🌈 最近選ばれたウェルビーイングカード" accent="text-brand-plum">
         <p className="mb-3 text-xs text-ink-soft">
           担当利用者が「いま大切にしたいこと」として選んだ3枚です

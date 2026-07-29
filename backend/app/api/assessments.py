@@ -135,7 +135,13 @@ def generate_monitoring(
 ) -> MonitoringOut:
     """期間のスコア・記録から評価の下書きを生成する（スタッフが編集して確定する）。"""
     check_user_access(db, current_user, user_id)
-    draft = build_monitoring_draft(db, user_id, body.period_months)
+    draft = build_monitoring_draft(
+        db,
+        user_id,
+        body.period_months,
+        period_start=body.period_start,
+        period_end=body.period_end,
+    )
     if draft is None:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -149,6 +155,7 @@ def generate_monitoring(
         period_start=draft["period_start"],
         period_end=draft["period_end"],
         score_summary_json=draft["score_summary"],
+        overall_evaluation=draft["overall_evaluation"],
         achievements=draft["achievements"],
         challenges=draft["challenges"],
         plan_adjustments=draft["plan_adjustments"],

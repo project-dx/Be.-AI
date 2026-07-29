@@ -25,9 +25,28 @@ def _avg(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 1) if values else None
 
 
-def build_monitoring_draft(db: Session, user_id: int, period_months: int = 6) -> dict[str, Any] | None:
-    period_end = date.today()
-    period_start = period_end - timedelta(days=period_months * 30)
+MAX_OVERALL_CHARS = 1000
+
+
+def _jp_date(d: date) -> str:
+    """OSに依存しない日本語の日付表記（例: 2026年7月29日）"""
+    return f"{d.year}年{d.month}月{d.day}日"
+
+
+def build_monitoring_draft(
+    db: Session,
+    user_id: int,
+    period_months: int = 6,
+    period_start: date | None = None,
+    period_end: date | None = None,
+) -> dict[str, Any] | None:
+    """期間の実績をまとめた評価の下書きを返す。
+
+    period_start/period_end を渡すとその期間を、渡さない場合は直近 period_months か月を対象にする。
+    """
+    if period_start is None or period_end is None:
+        period_end = date.today()
+        period_start = period_end - timedelta(days=period_months * 30)
 
     reports = (
         db.query(UserDailyReport)
@@ -75,10 +94,13 @@ def build_monitoring_draft(db: Session, user_id: int, period_months: int = 6) ->
     first_half = [s for s in scores if s.score_date <= mid]
     second_half = [s for s in scores if s.score_date > mid]
 
+    span_days = (period_end - period_start).days + 1
     score_summary: dict[str, Any] = {
         "period_months": period_months,
+        "span_days": span_days,
         "report_count": len(reports),
         "score_count": len(scores),
+        "staff_report_count": len(staff_reports),
         "scores": {},
     }
     improved: list[str] = []
@@ -144,14 +166,120 @@ def build_monitoring_draft(db: Session, user_id: int, period_months: int = 6) ->
     else:
         focus_parts.append("現在の安定した状態を維持しながら、就労に向けた新しい経験の機会を検討します。")
 
+    overall = _build_overall_evaluation(
+        period_start=period_start,
+        period_end=period_end,
+        span_days=span_days,
+        reports=reports,
+        staff_reports=staff_reports,
+        improved=improved,
+        declined=declined,
+        achieved_goals=achieved_goals,
+        ongoing_goals=ongoing_goals,
+        success_days=success_days,
+        urgent_count=urgent_count,
+        plan=plan,
+    )
+
     return {
         "period_start": period_start,
         "period_end": period_end,
         "support_plan_id": plan.id if plan else None,
         "score_summary": score_summary,
+        "overall_evaluation": overall,
         "achievements": "".join(achievements_parts),
         "challenges": "".join(challenges_parts),
         "plan_adjustments": "".join(adjustments_parts),
         "next_period_focus": "".join(focus_parts),
         "model_name": "rule-based",
     }
+
+
+def _build_overall_evaluation(
+    *,
+    period_start: date,
+    period_end: date,
+    span_days: int,
+    reports: list[UserDailyReport],
+    staff_reports: list[StaffDailyReport],
+    improved: list[str],
+    declined: list[str],
+    achieved_goals: list[Goal],
+    ongoing_goals: list[Goal],
+    success_days: int,
+    urgent_count: int,
+    plan: SupportPlan | None,
+) -> str:
+    """期間全体をまとめた総合評価を1000文字以内で組み立てる。
+
+    日報・スタッフの支援記録・スコア・目標をひとつの文章にまとめる。
+    断定を避け、スタッフが編集して確定することを前提とした文面にする。
+    """
+    months = round(span_days / 30, 1)
+    attendance_rate = round(len(reports) / span_days * 100) if span_days else 0
+
+    parts: list[str] = []
+
+    # 1. 期間と記録量の概観
+    parts.append(
+        f"【対象期間】{_jp_date(period_start)}〜{_jp_date(period_end)}（約{months}か月）。"
+        f"この間に日報{len(reports)}件、支援記録{len(staff_reports)}件が蓄積されました"
+        f"（日報の記録率は約{attendance_rate}%）。"
+    )
+
+    # 2. 日々の状態の推移
+    if improved and declined:
+        parts.append(
+            f"【状態の推移】{ '、'.join(improved[:2]) }に改善が見られる一方、"
+            f"{ '、'.join(declined[:2]) }には低下傾向があり、項目によって差が出ています。"
+        )
+    elif improved:
+        parts.append(f"【状態の推移】{ '、'.join(improved[:3]) }に改善傾向が見られ、期間を通じて上向きに推移しました。")
+    elif declined:
+        parts.append(f"【状態の推移】{ '、'.join(declined[:3]) }に低下傾向が見られます。要因の確認が必要です。")
+    else:
+        parts.append("【状態の推移】スコアは期間を通じて大きな変動なく推移し、安定した状態を保てています。")
+
+    # 3. 支援記録から読み取れる関わり
+    if staff_reports:
+        absence = sum(1 for s in staff_reports if "欠席" in (s.support_content or ""))
+        caution = sum(1 for s in staff_reports if s.urgency == "caution")
+        support_part = f"【支援の経過】期間中に{len(staff_reports)}件の支援記録があり"
+        detail = []
+        if absence:
+            detail.append(f"うち欠席の記録が{absence}件")
+        if caution:
+            detail.append(f"注意が必要と判断された記録が{caution}件")
+        if urgent_count:
+            detail.append(f"確認・至急対応の記録が{urgent_count}件")
+        support_part += ("、" + "、".join(detail) + "でした。") if detail else "、大きな問題なく経過しました。"
+        if urgent_count:
+            support_part += "至急対応の記録についてはチーム内で共有し、再発防止の観点から振り返りが必要です。"
+        parts.append(support_part)
+
+    # 4. 目標の達成状況
+    goal_parts = []
+    if achieved_goals:
+        goal_parts.append(f"{len(achieved_goals)}件の目標に到達しました")
+    if ongoing_goals:
+        goal_parts.append(f"{len(ongoing_goals)}件が継続中です")
+    if goal_parts:
+        parts.append("【目標】" + "、".join(goal_parts) + "。")
+    if success_days:
+        parts.append(f"【本人の力】成功体験の記録が{success_days}日分あり、自己効力感につながる行動が続いています。")
+
+    # 5. 次期に向けて
+    next_part = "【次期に向けて】"
+    if plan:
+        next_part += f"支援計画「{plan.title}」を本人と振り返り、"
+    if declined:
+        next_part += "低下が見られた項目は目標を一段小さくし、達成しやすい形へ調整します。"
+    else:
+        next_part += "現在の支援を継続しつつ、本人の希望に応じて活動の幅を広げることを検討します。"
+    next_part += "本評価は記録にもとづく下書きであり、本人との面談を経てスタッフが確定してください。"
+    parts.append(next_part)
+
+    text = "".join(parts)
+    if len(text) > MAX_OVERALL_CHARS:
+        text = text[: MAX_OVERALL_CHARS - 1] + "…"
+    return text
