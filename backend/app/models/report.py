@@ -30,6 +30,13 @@ class UserDailyReport(Base):
     stress_level: Mapped[int | None] = mapped_column(Integer)  # 1..5
     fatigue_level: Mapped[int | None] = mapped_column(Integer)  # 1..5
     social_level: Mapped[int | None] = mapped_column(Integer)  # 1..5
+
+    # バイタルデータ（任意入力。医療診断には用いず、体調の傾向把握の参考とする）
+    body_temperature: Mapped[float | None] = mapped_column(Float)  # ℃
+    systolic_bp: Mapped[int | None] = mapped_column(Integer)  # 収縮期血圧（上）
+    diastolic_bp: Mapped[int | None] = mapped_column(Integer)  # 拡張期血圧（下）
+    pulse: Mapped[int | None] = mapped_column(Integer)  # 脈拍
+
     achievement: Mapped[str | None] = mapped_column(Text)
     success_experience: Mapped[str | None] = mapped_column(Text)
     difficulty: Mapped[str | None] = mapped_column(Text)

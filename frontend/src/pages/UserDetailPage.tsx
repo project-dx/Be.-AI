@@ -8,16 +8,23 @@ import StaffReportsPanel from './panels/StaffReportsPanel'
 import AnalysisPanel from './panels/AnalysisPanel'
 import PlansPanel from './panels/PlansPanel'
 import ActionsPanel from './panels/ActionsPanel'
+import AssessmentPanel from './panels/AssessmentPanel'
+import MonitoringPanel from './panels/MonitoringPanel'
+import WellbeingSelectionsPanel from './panels/WellbeingSelectionsPanel'
 import GoalsPage from './GoalsPage'
+import { useAuth } from '../stores/AuthContext'
 import { formatDate } from '../utils/labels'
 import type { User, UserDashboard } from '../types'
 
 const tabs = [
   { key: 'overview', label: '概要' },
+  { key: 'assessment', label: 'アセスメント' },
   { key: 'reports', label: '日報' },
   { key: 'staff-reports', label: 'スタッフ日報' },
   { key: 'analyses', label: 'AI分析' },
   { key: 'plans', label: '支援計画' },
+  { key: 'monitoring', label: 'モニタリング' },
+  { key: 'cards', label: 'カード' },
   { key: 'history', label: '支援履歴' },
   { key: 'goals', label: '目標' },
 ]
@@ -25,6 +32,7 @@ const tabs = [
 export default function UserDetailPage() {
   const { userId } = useParams()
   const id = Number(userId)
+  const { user: currentUser } = useAuth()
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab') ?? 'overview'
@@ -81,6 +89,11 @@ export default function UserDetailPage() {
 
       {tab === 'overview' &&
         (dashboard ? <UserDashboardContent data={dashboard} /> : <Card><Loading /></Card>)}
+      {tab === 'assessment' && (
+        <AssessmentPanel userId={id} canEdit={currentUser?.role === 'staff' || currentUser?.role === 'admin'} />
+      )}
+      {tab === 'monitoring' && <MonitoringPanel userId={id} />}
+      {tab === 'cards' && <WellbeingSelectionsPanel userId={id} />}
       {tab === 'reports' && <DailyReportsPanel userId={id} />}
       {tab === 'staff-reports' && <StaffReportsPanel userId={id} />}
       {tab === 'analyses' && <AnalysisPanel userId={id} />}

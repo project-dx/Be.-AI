@@ -71,7 +71,15 @@ export default function DailyReportsPanel({ userId }: { userId: number }) {
                 <p><span className="text-xs font-bold text-ink-faint block">食事</span>朝 {mealLabels[r.breakfast_status ?? ''] ?? '-'} ／ 昼 {mealLabels[r.lunch_status ?? ''] ?? '-'} ／ 夜 {mealLabels[r.dinner_status ?? ''] ?? '-'}</p>
                 <p><span className="text-xs font-bold text-ink-faint block">運動 / 仕事・勉強</span>{r.exercise_minutes ?? '-'}分 / {r.work_study_minutes ?? '-'}分</p>
                 <p><span className="text-xs font-bold text-ink-faint block">疲労 / 交流</span>{r.fatigue_level ?? '-'}/5 ／ {r.social_level ?? '-'}/5</p>
-                {r.achievement && <p className="sm:col-span-2"><span className="text-xs font-bold text-ink-faint block">今日できたこと</span>{r.achievement}</p>}
+                {(r.body_temperature != null || r.systolic_bp != null || r.pulse != null) && (
+                  <p className="sm:col-span-2">
+                    <span className="text-xs font-bold text-ink-faint block">バイタル</span>
+                    {r.body_temperature != null && <>体温 {r.body_temperature}℃</>}
+                    {r.systolic_bp != null && <>{r.body_temperature != null && ' ／ '}血圧 {r.systolic_bp}/{r.diastolic_bp ?? '-'}</>}
+                    {r.pulse != null && <>{(r.body_temperature != null || r.systolic_bp != null) && ' ／ '}脈拍 {r.pulse}</>}
+                  </p>
+                )}
+                {r.achievement &&<p className="sm:col-span-2"><span className="text-xs font-bold text-ink-faint block">今日できたこと</span>{r.achievement}</p>}
                 {r.success_experience && <p className="sm:col-span-2"><span className="text-xs font-bold text-ink-faint block">成功体験</span>{r.success_experience}</p>}
                 {r.difficulty && <p className="sm:col-span-2"><span className="text-xs font-bold text-ink-faint block">困ったこと</span>{r.difficulty}</p>}
                 {r.tomorrow_goal && <p className="sm:col-span-2"><span className="text-xs font-bold text-ink-faint block">明日の目標</span>{r.tomorrow_goal}</p>}

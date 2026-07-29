@@ -2,7 +2,10 @@ import axios, { AxiosError } from 'axios'
 import type {
   AdminDashboard,
   AiAnalysis,
+  Assessment,
   AuditLog,
+  ColorfulPyramid,
+  MonitoringEvaluation,
   DailyReport,
   Goal,
   MonthlyReport,
@@ -228,6 +231,32 @@ export const wellbeingApi = {
     api.get<WellbeingSelection[]>(`/users/${userId}/wellbeing-selections`, { params: { limit } }).then((r) => r.data),
   save: (userId: number, body: { card_ids: string[]; note?: string; selection_date?: string }) =>
     api.post<WellbeingSelection>(`/users/${userId}/wellbeing-selections`, body).then((r) => r.data),
+}
+
+// --- 初期アセスメント / カラフルピラミッド / モニタリング評価 ---
+export const assessmentApi = {
+  get: (userId: number) => api.get<Assessment>(`/users/${userId}/assessment`).then((r) => r.data),
+  save: (userId: number, body: Partial<Assessment>) =>
+    api.put<Assessment>(`/users/${userId}/assessment`, body).then((r) => r.data),
+}
+
+export const pyramidApi = {
+  get: (userId: number) => api.get<ColorfulPyramid>(`/users/${userId}/pyramid`).then((r) => r.data),
+  save: (userId: number, body: Partial<ColorfulPyramid>) =>
+    api.put<ColorfulPyramid>(`/users/${userId}/pyramid`, body).then((r) => r.data),
+}
+
+export const monitoringApi = {
+  list: (userId: number) =>
+    api.get<MonitoringEvaluation[]>(`/users/${userId}/monitoring-evaluations`).then((r) => r.data),
+  generate: (userId: number, periodMonths = 6) =>
+    api
+      .post<MonitoringEvaluation>(`/users/${userId}/monitoring-evaluations`, { period_months: periodMonths })
+      .then((r) => r.data),
+  update: (userId: number, evaluationId: number, body: Partial<MonitoringEvaluation>) =>
+    api
+      .patch<MonitoringEvaluation>(`/users/${userId}/monitoring-evaluations/${evaluationId}`, body)
+      .then((r) => r.data),
 }
 
 // --- 監査ログ・設定 ---

@@ -21,6 +21,13 @@ const optionalMinutes = z
   .union([z.literal(''), z.null(), z.coerce.number().min(0, '0以上で入力してください').max(1440, '1440分以内で入力してください')])
   .transform((v) => (v === '' || v == null ? null : v))
 
+/** バイタルなど「はかった人だけ入力する」任意項目（未入力・キー自体がなくてもよい） */
+const optionalMeasurement = (min: number, max: number, message: string) =>
+  z
+    .union([z.literal(''), z.null(), z.coerce.number().min(min, message).max(max, message)])
+    .transform((v) => (v === '' || v == null ? null : v))
+    .optional()
+
 export const dailyReportSchema = z.object({
   report_date: z.string().min(1, '日付を入力してください'),
   mood: optionalScale,
@@ -42,6 +49,10 @@ export const dailyReportSchema = z.object({
   stress_level: optionalScale,
   fatigue_level: optionalScale,
   social_level: optionalScale,
+  body_temperature: optionalMeasurement(33, 43, '33〜43℃の範囲で入力してください'),
+  systolic_bp: optionalMeasurement(50, 260, '50〜260の範囲で入力してください'),
+  diastolic_bp: optionalMeasurement(20, 200, '20〜200の範囲で入力してください'),
+  pulse: optionalMeasurement(20, 250, '20〜250の範囲で入力してください'),
   achievement: z.string().max(2000, '2000文字以内で入力してください').optional(),
   success_experience: z.string().max(2000, '2000文字以内で入力してください').optional(),
   difficulty: z.string().max(2000, '2000文字以内で入力してください').optional(),
@@ -64,6 +75,10 @@ export interface DailyReportForm {
   stress_level: number | null
   fatigue_level: number | null
   social_level: number | null
+  body_temperature: number | '' | null
+  systolic_bp: number | '' | null
+  diastolic_bp: number | '' | null
+  pulse: number | '' | null
   achievement: string
   success_experience: string
   difficulty: string

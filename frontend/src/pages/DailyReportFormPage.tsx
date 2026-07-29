@@ -28,6 +28,10 @@ const emptyForm: DailyReportForm = {
   stress_level: null,
   fatigue_level: null,
   social_level: null,
+  body_temperature: '',
+  systolic_bp: '',
+  diastolic_bp: '',
+  pulse: '',
   achievement: '',
   success_experience: '',
   difficulty: '',
@@ -83,6 +87,10 @@ export default function DailyReportFormPage() {
             stress_level: existing.stress_level,
             fatigue_level: existing.fatigue_level,
             social_level: existing.social_level,
+            body_temperature: existing.body_temperature ?? '',
+            systolic_bp: existing.systolic_bp ?? '',
+            diastolic_bp: existing.diastolic_bp ?? '',
+            pulse: existing.pulse ?? '',
             achievement: existing.achievement ?? '',
             success_experience: existing.success_experience ?? '',
             difficulty: existing.difficulty ?? '',
@@ -288,6 +296,47 @@ export default function DailyReportFormPage() {
               <Field label="人との交流" required error={errors.social_level}>
                 <ScaleInput name="人との交流" value={form.social_level ?? null} onChange={(v) => set('social_level', v)} lowLabel="少なかった" highLabel="たくさんあった" />
               </Field>
+
+              <div className="rounded-2xl bg-paper p-4">
+                <p className="mb-1 text-sm font-bold text-ink">🌡️ バイタル（はかった人だけでOK）</p>
+                <p className="mb-3 text-xs text-ink-soft">
+                  はかっていない日は空欄のままで大丈夫です。体調の傾向を見るための参考にします
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="体温（℃）" error={errors.body_temperature}>
+                    <input
+                      type="number" inputMode="decimal" step="0.1" min={33} max={43} placeholder="36.5"
+                      className={inputClass}
+                      value={form.body_temperature ?? ''}
+                      onChange={(e) => set('body_temperature', e.target.value === '' ? '' : Number(e.target.value))}
+                    />
+                  </Field>
+                  <Field label="脈拍（回/分）" error={errors.pulse}>
+                    <input
+                      type="number" inputMode="numeric" min={20} max={250} placeholder="70"
+                      className={inputClass}
+                      value={form.pulse ?? ''}
+                      onChange={(e) => set('pulse', e.target.value === '' ? '' : Number(e.target.value))}
+                    />
+                  </Field>
+                  <Field label="血圧・上（mmHg）" error={errors.systolic_bp}>
+                    <input
+                      type="number" inputMode="numeric" min={50} max={260} placeholder="120"
+                      className={inputClass}
+                      value={form.systolic_bp ?? ''}
+                      onChange={(e) => set('systolic_bp', e.target.value === '' ? '' : Number(e.target.value))}
+                    />
+                  </Field>
+                  <Field label="血圧・下（mmHg）" error={errors.diastolic_bp}>
+                    <input
+                      type="number" inputMode="numeric" min={20} max={200} placeholder="75"
+                      className={inputClass}
+                      value={form.diastolic_bp ?? ''}
+                      onChange={(e) => set('diastolic_bp', e.target.value === '' ? '' : Number(e.target.value))}
+                    />
+                  </Field>
+                </div>
+              </div>
             </>
           )}
 

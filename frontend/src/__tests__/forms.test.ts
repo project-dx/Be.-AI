@@ -108,3 +108,53 @@ describe('staffReportSchema', () => {
     expect(result.success).toBe(false)
   })
 })
+
+describe('dailyReportSchema（バイタル）', () => {
+  const base = {
+    report_date: '2026-07-22',
+    mood: 3,
+    sleep_hours: 7,
+    bedtime: '23:00',
+    wake_time: '06:30',
+    sleep_quality: 3,
+    breakfast_status: 'eaten',
+    lunch_status: '',
+    dinner_status: '',
+    exercise_minutes: 30,
+    work_study_minutes: 240,
+    stress_level: 2,
+    fatigue_level: 2,
+    social_level: 3,
+  }
+
+  it('バイタル未入力でも受け付ける', () => {
+    expect(dailyReportSchema.safeParse(base).success).toBe(true)
+  })
+
+  it('正常なバイタルを受け付ける', () => {
+    const result = dailyReportSchema.safeParse({
+      ...base, body_temperature: 36.5, systolic_bp: 120, diastolic_bp: 76, pulse: 68,
+    })
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.body_temperature).toBe(36.5)
+      expect(result.data.pulse).toBe(68)
+    }
+  })
+
+  it('空文字はnullに変換される', () => {
+    const result = dailyReportSchema.safeParse({
+      ...base, body_temperature: '', systolic_bp: '', diastolic_bp: '', pulse: '',
+    })
+    expect(result.success).toBe(true)
+    if (result.success) expect(result.data.body_temperature).toBeNull()
+  })
+
+  it('範囲外の体温はエラーになる', () => {
+    const result = dailyReportSchema.safeParse({ ...base, body_temperature: 50 })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('33〜43℃の範囲で入力してください')
+    }
+  })
+})

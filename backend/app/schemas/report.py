@@ -22,6 +22,10 @@ class UserDailyReportBase(BaseModel):
     stress_level: int | None = Field(default=None, ge=1, le=5)
     fatigue_level: int | None = Field(default=None, ge=1, le=5)
     social_level: int | None = Field(default=None, ge=1, le=5)
+    body_temperature: float | None = Field(default=None, ge=33.0, le=43.0)
+    systolic_bp: int | None = Field(default=None, ge=50, le=260)
+    diastolic_bp: int | None = Field(default=None, ge=20, le=200)
+    pulse: int | None = Field(default=None, ge=20, le=250)
     achievement: str | None = None
     success_experience: str | None = None
     difficulty: str | None = None
@@ -59,6 +63,10 @@ class UserDailyReportUpdate(BaseModel):
     stress_level: int | None = Field(default=None, ge=1, le=5)
     fatigue_level: int | None = Field(default=None, ge=1, le=5)
     social_level: int | None = Field(default=None, ge=1, le=5)
+    body_temperature: float | None = Field(default=None, ge=33.0, le=43.0)
+    systolic_bp: int | None = Field(default=None, ge=50, le=260)
+    diastolic_bp: int | None = Field(default=None, ge=20, le=200)
+    pulse: int | None = Field(default=None, ge=20, le=250)
     achievement: str | None = None
     success_experience: str | None = None
     difficulty: str | None = None

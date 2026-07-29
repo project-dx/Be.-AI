@@ -8,6 +8,7 @@ from app.models.risk import RiskAlert
 from app.models.audit import AuditLog
 from app.models.setting import SystemSetting
 from app.models.wellbeing import WellbeingCardSelection
+from app.models.assessment import Assessment, ColorfulPyramid, MonitoringEvaluation
 
 __all__ = [
     "User",
@@ -25,4 +26,7 @@ __all__ = [
     "AuditLog",
     "SystemSetting",
     "WellbeingCardSelection",
+    "Assessment",
+    "ColorfulPyramid",
+    "MonitoringEvaluation",
 ]

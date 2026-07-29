@@ -39,6 +39,10 @@ export interface DailyReport {
   stress_level: number | null
   fatigue_level: number | null
   social_level: number | null
+  body_temperature: number | null
+  systolic_bp: number | null
+  diastolic_bp: number | null
+  pulse: number | null
   achievement: string | null
   success_experience: string | null
   difficulty: string | null
@@ -363,6 +367,61 @@ export interface WellbeingSelection {
   selection_date: string
   card_ids: string[]
   note: string | null
+  created_at: string
+  updated_at: string
+}
+
+// --- 初期アセスメント / カラフルピラミッド / モニタリング評価 ---
+export interface Assessment {
+  id: number
+  user_id: number
+  assessment_date: string
+  life_history: string | null
+  disability_characteristics: string | null
+  thinking_style: string | null
+  herrmann_a: number | null
+  herrmann_b: number | null
+  herrmann_c: number | null
+  herrmann_d: number | null
+  personal_values: string | null
+  strengths: string | null
+  support_needs: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ColorfulPyramid {
+  id: number
+  user_id: number
+  wellbeing: string | null
+  passion: string | null
+  vision: string | null
+  mission: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface MonitoringEvaluation {
+  id: number
+  user_id: number
+  support_plan_id: number | null
+  evaluation_date: string
+  period_start: string
+  period_end: string
+  score_summary_json: {
+    period_months: number
+    report_count: number
+    score_count: number
+    scores: Record<string, { label: string; before: number | null; after: number | null; diff?: number }>
+  } | null
+  achievements: string | null
+  challenges: string | null
+  plan_adjustments: string | null
+  next_period_focus: string | null
+  staff_comment: string | null
+  ai_generated: boolean
+  model_name: string | null
   created_at: string
   updated_at: string
 }

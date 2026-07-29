@@ -34,6 +34,7 @@ const navByRole: Record<string, NavItem[]> = {
     { to: '/my-reports', label: 'ふりかえり', icon: '📖', activeClass: 'bg-brand-leaf-soft text-ink', dotClass: 'bg-brand-leaf' },
     { to: '/goals', label: 'もくひょう', icon: '🎯', activeClass: 'bg-brand-sea-soft text-ink', dotClass: 'bg-brand-sea' },
     { to: '/wellbeing-cards', label: 'カードをえらぶ', icon: '🌈', activeClass: 'bg-brand-plum-soft text-ink', dotClass: 'bg-brand-plum' },
+    { to: '/my-pyramid', label: 'わたしのピラミッド', icon: '🔺', activeClass: 'bg-brand-coral-soft text-ink', dotClass: 'bg-brand-coral' },
   ],
 }
 

@@ -15,6 +15,7 @@ import GoalsPage from './pages/GoalsPage'
 import RiskAlertsPage from './pages/RiskAlertsPage'
 import MonthlyReportPage from './pages/MonthlyReportPage'
 import WellbeingCardsPage from './pages/WellbeingCardsPage'
+import MyPyramidPage from './pages/MyPyramidPage'
 import AccountsPage from './pages/AccountsPage'
 import AuditLogsPage from './pages/AuditLogsPage'
 import SettingsPage from './pages/SettingsPage'
@@ -83,6 +84,14 @@ export default function App() {
               element={
                 <RequireAuth roles={['user']}>
                   <WellbeingCardsPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/my-pyramid"
+              element={
+                <RequireAuth roles={['user']}>
+                  <MyPyramidPage />
                 </RequireAuth>
               }
             />

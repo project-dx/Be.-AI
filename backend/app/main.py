@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 
 from app.api import (
     ai_analyses,
+    assessments,
     audit_logs,
     auth,
     daily_reports,
@@ -91,6 +92,7 @@ app.include_router(scores.router)
 app.include_router(ai_analyses.router)
 app.include_router(monthly_reports.router)
 app.include_router(wellbeing.router)
+app.include_router(assessments.router)
 app.include_router(support_plans.router)
 app.include_router(goals.router)
 app.include_router(risks.router)
