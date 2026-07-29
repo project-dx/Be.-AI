@@ -153,6 +153,7 @@ export interface SupportPlan {
   user_id: number
   title: string
   status: PlanStatus
+  overall_policy: string | null
   current_issues: string | null
   strengths: string | null
   user_preferences: string | null

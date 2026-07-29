@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class SupportPlanBase(BaseModel):
     title: str = Field(min_length=1, max_length=200)
+    overall_policy: str | None = None
     current_issues: str | None = None
     strengths: str | None = None
     user_preferences: str | None = None
@@ -29,6 +30,7 @@ class SupportPlanCreate(SupportPlanBase):
 class SupportPlanUpdate(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=200)
     status: str | None = Field(default=None, pattern="^(draft|in_review|approved|active|evaluated|closed)$")
+    overall_policy: str | None = None
     current_issues: str | None = None
     strengths: str | None = None
     user_preferences: str | None = None

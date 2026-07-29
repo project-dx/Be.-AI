@@ -15,6 +15,7 @@ const listFields: { key: keyof SupportPlan; label: string }[] = [
 ]
 
 const textFields: { key: keyof SupportPlan; label: string }[] = [
+  { key: 'overall_policy', label: '総合的な援助の方針' },
   { key: 'current_issues', label: '現在の課題' },
   { key: 'strengths', label: '利用者の強み' },
   { key: 'user_preferences', label: '本人の希望' },

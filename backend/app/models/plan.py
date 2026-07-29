@@ -19,6 +19,7 @@ class SupportPlan(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     status: Mapped[str] = mapped_column(String(20), default="draft", nullable=False)
 
+    overall_policy: Mapped[str | None] = mapped_column(Text)  # 総合的な援助の方針
     current_issues: Mapped[str | None] = mapped_column(Text)
     strengths: Mapped[str | None] = mapped_column(Text)
     user_preferences: Mapped[str | None] = mapped_column(Text)  # 本人の希望
