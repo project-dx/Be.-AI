@@ -187,10 +187,10 @@ def test_analysis_context_includes_assessment_and_vitals(
     assert context["daily_reports"][0]["vitals"]["body_temperature"] == 36.4
 
 
-def test_monitoring_overall_evaluation_within_1000_chars(
+def test_monitoring_overall_evaluation_is_about_200_chars(
     client: TestClient, db: Session, member: User, staff: User
 ) -> None:
-    """6か月分の記録をまとめた総合評価が1000文字以内で生成される"""
+    """6か月分の記録をまとめた総合評価が200文字程度で生成される"""
     from app.models import StaffDailyReport
 
     today = date.today()
@@ -224,11 +224,11 @@ def test_monitoring_overall_evaluation_within_1000_chars(
     assert res.status_code == 201, res.text
     overall = res.json()["overall_evaluation"]
     assert overall
-    assert len(overall) <= 1000, f"{len(overall)}文字（1000文字以内を想定）"
+    assert 120 <= len(overall) <= 240, f"{len(overall)}文字（200文字程度を想定）: {overall}"
     # 6か月分の日報と支援記録の両方がまとめられている
-    assert "【対象期間】" in overall
+    assert "日報" in overall
     assert "支援記録" in overall
-    assert "【次期に向けて】" in overall
+    assert "次期" in overall
 
 
 def test_monitoring_accepts_calendar_period(
@@ -268,3 +268,45 @@ def test_monitoring_rejects_invalid_period(client: TestClient, member: User, sta
         headers=headers,
     )
     assert res.status_code == 422
+
+
+def test_monitoring_reflects_support_plan_goal(
+    client: TestClient, db: Session, member: User, staff: User
+) -> None:
+    """総合評価に個別支援計画の短期目標が反映される"""
+    from app.models import SupportPlan
+
+    today = date.today()
+    for i in range(10):
+        db.add(
+            UserDailyReport(
+                user_id=member.id, report_date=today - timedelta(days=i),
+                mood=4, sleep_hours=7.0, is_draft=False,
+            )
+        )
+    db.add(
+        SupportPlan(
+            user_id=member.id,
+            title="Webデザイナーとしての就労に向けた個別支援計画",
+            status="approved",
+            overall_policy="体調管理とペース配分を意識しながら支援を行っていきます。",
+            long_term_goal="体調を安定して維持し、Webデザイナーとして一般就労する。",
+            short_term_goals_json=[
+                "ペース配分を意識して安定した通所を継続する。",
+                "HTML/CSSの基礎を習得する。",
+            ],
+        )
+    )
+    db.commit()
+
+    headers = login_headers(client, staff.email)
+    res = client.post(
+        f"/api/users/{member.id}/monitoring-evaluations",
+        json={"period_months": 6},
+        headers=headers,
+    )
+    assert res.status_code == 201, res.text
+    overall = res.json()["overall_evaluation"]
+    assert "計画の短期目標" in overall
+    assert "ペース配分を意識して安定した通所を継続する" in overall
+    assert len(overall) <= 240, f"{len(overall)}文字: {overall}"

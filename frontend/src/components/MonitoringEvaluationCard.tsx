@@ -94,7 +94,7 @@ export function MonitoringEvaluationCard({ users }: { users: { user_id: number; 
             <div className="rounded-2xl border border-brand-sea/25 bg-brand-sea-soft p-4">
               <p className="mb-1.5 text-sm font-bold text-ink">📋 総合評価（半期のまとめ）</p>
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">{result.overall_evaluation}</p>
-              <p className="mt-2 text-right text-[11px] text-ink-faint">{result.overall_evaluation.length} / 1000文字</p>
+              <p className="mt-2 text-right text-[11px] text-ink-faint">{result.overall_evaluation.length}文字</p>
             </div>
           )}
 

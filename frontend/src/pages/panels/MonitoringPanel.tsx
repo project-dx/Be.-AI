@@ -6,7 +6,7 @@ import { formatDate } from '../../utils/labels'
 import type { MonitoringEvaluation } from '../../types'
 
 const EDITABLE_FIELDS: { key: keyof MonitoringEvaluation; label: string; hint?: string }[] = [
-  { key: 'overall_evaluation', label: '総合評価（半期のまとめ）', hint: '1000文字以内。期間全体の実績をまとめた文章です' },
+  { key: 'overall_evaluation', label: '総合評価（半期のまとめ）', hint: '200文字程度。期間全体の実績をまとめた文章です' },
   { key: 'achievements', label: '達成できたこと' },
   { key: 'challenges', label: '残された課題' },
   { key: 'plan_adjustments', label: '支援計画の調整' },

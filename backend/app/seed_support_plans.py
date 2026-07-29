@@ -6,11 +6,12 @@ DATABASE_URL=... uv run python -m app.seed_support_plans
 既に同じメールアドレスのアカウントがある場合は、計画のみ追加する。
 """
 
-from datetime import date
+from datetime import date, timedelta
 
 from app.core.database import SessionLocal
 from app.core.security import hash_password
-from app.models import Profile, SupportPlan, SupportPlanVersion, User
+from app.models import Profile, SupportPlan, SupportPlanVersion, User, UserDailyReport
+from app.services.scoring import recalculate_range
 
 PASSWORD = "User123!"
 CREATED_DATE = date(2026, 7, 29)
@@ -154,6 +155,91 @@ PLANS: list[tuple[str, str, str, dict]] = [
 ]
 
 
+# 個別支援計画の人物像に沿った日報のパターン
+# key: 利用者番号, value: 期間の進み具合(0.0〜1.0)から日報の値を作る関数の設定
+REPORT_PATTERNS: dict[str, dict] = {
+    # 山田花子: 集中しすぎてオーバーワークになりやすい。後半はペース配分が身につき疲労が改善
+    "10001": {
+        "mood": lambda p: 4 if p > 0.5 else 3,
+        "sleep": lambda p: round(5.5 + 1.5 * p, 1),
+        "fatigue": lambda p: 4 if p < 0.5 else 2,
+        "stress": lambda p: 3 if p < 0.5 else 2,
+        "social": lambda p: 3,
+        "achievements": ["Webデザインの動画学習", "HTML/CSSの基礎練習", "バナー制作の課題", "ポートフォリオの構成案作成"],
+        "success": "作業の区切りで休憩を取れた",
+        "difficulty": "集中しすぎて休憩を忘れてしまった",
+    },
+    # 佐藤健一: 不安を抱えやすい。相談できるようになり後半は気分が安定
+    "10002": {
+        "mood": lambda p: 2 if p < 0.4 else 3 if p < 0.7 else 4,
+        "sleep": lambda p: round(6.0 + 1.0 * p, 1),
+        "fatigue": lambda p: 3,
+        "stress": lambda p: 4 if p < 0.4 else 3 if p < 0.7 else 2,
+        "social": lambda p: 2 if p < 0.5 else 3,
+        "achievements": ["Pythonの基礎学習", "変数と条件分岐の練習", "簡単な計算プログラムの作成", "リスト操作の練習"],
+        "success": "わからない箇所をスタッフに質問できた",
+        "difficulty": "自分のスキルに自信が持てず不安になった",
+    },
+    # 高橋直樹: 前向きで安定。作業は速いがケアレスミスが課題
+    "10003": {
+        "mood": lambda p: 4,
+        "sleep": lambda p: 7.0,
+        "fatigue": lambda p: 2,
+        "stress": lambda p: 2,
+        "social": lambda p: 4,
+        "achievements": ["Excelの関数練習", "データ入力の実践課題", "Wordでの文書作成", "MOS模擬テスト"],
+        "success": "見直しでミスを見つけて直せた",
+        "difficulty": "急いで進めてケアレスミスが出た",
+    },
+}
+
+
+def _seed_daily_reports(db, user: User, number: str, today: date, months: int = 6) -> int:
+    """人物像に沿った日報を平日のみ作成する（すでにある日はスキップ）。"""
+    pattern = REPORT_PATTERNS[number]
+    start = today - timedelta(days=months * 30)
+    created = 0
+    day = start
+    index = 0
+    while day <= today:
+        if day.weekday() < 5:  # 平日のみ通所
+            progress = (day - start).days / max((today - start).days, 1)
+            exists = (
+                db.query(UserDailyReport)
+                .filter(UserDailyReport.user_id == user.id, UserDailyReport.report_date == day)
+                .first()
+            )
+            if not exists:
+                fatigue = pattern["fatigue"](progress)
+                db.add(
+                    UserDailyReport(
+                        user_id=user.id,
+                        report_date=day,
+                        mood=pattern["mood"](progress),
+                        sleep_hours=pattern["sleep"](progress),
+                        bedtime="23:30",
+                        wake_time="07:00",
+                        sleep_quality=3 if fatigue >= 4 else 4,
+                        breakfast_status="eaten",
+                        lunch_status="eaten",
+                        dinner_status="eaten",
+                        exercise_minutes=20,
+                        work_study_minutes=300,
+                        stress_level=pattern["stress"](progress),
+                        fatigue_level=fatigue,
+                        social_level=pattern["social"](progress),
+                        achievement=pattern["achievements"][index % len(pattern["achievements"])],
+                        success_experience=pattern["success"] if index % 3 == 0 else None,
+                        difficulty=pattern["difficulty"] if fatigue >= 4 and index % 4 == 0 else None,
+                        is_draft=False,
+                    )
+                )
+                created += 1
+            index += 1
+        day += timedelta(days=1)
+    return created
+
+
 def _get_or_create_user(db, email: str, display_name: str, staff_id: int | None) -> User:
     user = db.query(User).filter(User.email == email).first()
     if user:
@@ -182,10 +268,19 @@ def run() -> None:
         staff = db.query(User).filter(User.role == "staff").order_by(User.id).first()
         staff_id = staff.id if staff else None
 
+        today = date.today()
         print("--- 利用者 ---")
         created_plans = 0
         for number, display_name, email, plan_data in PLANS:
             user = _get_or_create_user(db, email, display_name, staff_id)
+
+            # 人物像に沿った6か月分の日報とスコア
+            created_reports = _seed_daily_reports(db, user, number, today)
+            if created_reports:
+                db.flush()
+                recalculate_range(db, user.id, today - timedelta(days=180), today)
+                db.flush()
+                print(f"    日報を{created_reports}件作成し、スコアを算出しました")
 
             existing = db.query(SupportPlan).filter(SupportPlan.user_id == user.id).first()
             if existing:

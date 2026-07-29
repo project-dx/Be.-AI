@@ -25,7 +25,7 @@ def _avg(values: list[float]) -> float | None:
     return round(sum(values) / len(values), 1) if values else None
 
 
-MAX_OVERALL_CHARS = 1000
+MAX_OVERALL_CHARS = 240  # 200文字程度に収める（超える場合は末尾を丸める）
 
 
 def _jp_date(d: date) -> str:
@@ -210,74 +210,58 @@ def _build_overall_evaluation(
     urgent_count: int,
     plan: SupportPlan | None,
 ) -> str:
-    """期間全体をまとめた総合評価を1000文字以内で組み立てる。
+    """期間全体をまとめた総合評価を200文字程度で組み立てる。
 
-    日報・スタッフの支援記録・スコア・目標をひとつの文章にまとめる。
+    個別支援計画の短期目標に対する進み具合を軸に、
+    記録量・スコアの推移・次期の方針を1つの短い文章にまとめる。
     断定を避け、スタッフが編集して確定することを前提とした文面にする。
     """
     months = round(span_days / 30, 1)
-    attendance_rate = round(len(reports) / span_days * 100) if span_days else 0
-
     parts: list[str] = []
 
-    # 1. 期間と記録量の概観
+    # 1. 期間と記録量（約45字）
     parts.append(
-        f"【対象期間】{_jp_date(period_start)}〜{_jp_date(period_end)}（約{months}か月）。"
-        f"この間に日報{len(reports)}件、支援記録{len(staff_reports)}件が蓄積されました"
-        f"（日報の記録率は約{attendance_rate}%）。"
+        f"【{_jp_date(period_start)}〜{_jp_date(period_end)}・約{months}か月】"
+        f"日報{len(reports)}件、支援記録{len(staff_reports)}件。"
     )
 
-    # 2. 日々の状態の推移
+    # 2. 状態の推移（約35字。スコア名のみを使い簡潔にする）
+    def names(items: list[str], limit: int = 2) -> str:
+        return "・".join(i.split("（")[0] for i in items[:limit])
+
     if improved and declined:
-        parts.append(
-            f"【状態の推移】{ '、'.join(improved[:2]) }に改善が見られる一方、"
-            f"{ '、'.join(declined[:2]) }には低下傾向があり、項目によって差が出ています。"
-        )
+        parts.append(f"{names(improved)}は改善、{names(declined)}は低下傾向です。")
     elif improved:
-        parts.append(f"【状態の推移】{ '、'.join(improved[:3]) }に改善傾向が見られ、期間を通じて上向きに推移しました。")
+        parts.append(f"{names(improved)}に改善傾向が見られます。")
     elif declined:
-        parts.append(f"【状態の推移】{ '、'.join(declined[:3]) }に低下傾向が見られます。要因の確認が必要です。")
+        parts.append(f"{names(declined)}に低下傾向があり、要因の確認が必要です。")
     else:
-        parts.append("【状態の推移】スコアは期間を通じて大きな変動なく推移し、安定した状態を保てています。")
+        parts.append("スコアは大きな変動なく安定して推移しました。")
 
-    # 3. 支援記録から読み取れる関わり
-    if staff_reports:
-        absence = sum(1 for s in staff_reports if "欠席" in (s.support_content or ""))
-        caution = sum(1 for s in staff_reports if s.urgency == "caution")
-        support_part = f"【支援の経過】期間中に{len(staff_reports)}件の支援記録があり"
-        detail = []
-        if absence:
-            detail.append(f"うち欠席の記録が{absence}件")
-        if caution:
-            detail.append(f"注意が必要と判断された記録が{caution}件")
-        if urgent_count:
-            detail.append(f"確認・至急対応の記録が{urgent_count}件")
-        support_part += ("、" + "、".join(detail) + "でした。") if detail else "、大きな問題なく経過しました。"
-        if urgent_count:
-            support_part += "至急対応の記録についてはチーム内で共有し、再発防止の観点から振り返りが必要です。"
-        parts.append(support_part)
+    # 3. 支援計画の短期目標に対する進み具合（約60字）
+    if plan and plan.short_term_goals_json:
+        goal = str(plan.short_term_goals_json[0]).rstrip("。")
+        if declined or urgent_count:
+            state = "支援内容の見直しが必要です"
+        elif improved or achieved_goals:
+            state = "着実に前進しています"
+        else:
+            state = "継続して取り組んでいます"
+        parts.append(f"計画の短期目標「{goal}」は{state}。")
+    elif achieved_goals or ongoing_goals:
+        parts.append(f"目標は{len(achieved_goals)}件達成、{len(ongoing_goals)}件が継続中です。")
 
-    # 4. 目標の達成状況
-    goal_parts = []
-    if achieved_goals:
-        goal_parts.append(f"{len(achieved_goals)}件の目標に到達しました")
-    if ongoing_goals:
-        goal_parts.append(f"{len(ongoing_goals)}件が継続中です")
-    if goal_parts:
-        parts.append("【目標】" + "、".join(goal_parts) + "。")
-    if success_days:
-        parts.append(f"【本人の力】成功体験の記録が{success_days}日分あり、自己効力感につながる行動が続いています。")
+    # 4. 気になる点（あれば約25字）
+    if urgent_count:
+        parts.append(f"確認・至急対応の記録が{urgent_count}件あり、チームでの共有が必要です。")
+    elif success_days:
+        parts.append(f"成功体験の記録が{success_days}日分あり、自信につながっています。")
 
-    # 5. 次期に向けて
-    next_part = "【次期に向けて】"
-    if plan:
-        next_part += f"支援計画「{plan.title}」を本人と振り返り、"
+    # 5. 次期に向けて（約45字）
     if declined:
-        next_part += "低下が見られた項目は目標を一段小さくし、達成しやすい形へ調整します。"
+        parts.append("次期は低下項目の要因を面談で確認し、目標を達成しやすい形へ調整します。")
     else:
-        next_part += "現在の支援を継続しつつ、本人の希望に応じて活動の幅を広げることを検討します。"
-    next_part += "本評価は記録にもとづく下書きであり、本人との面談を経てスタッフが確定してください。"
-    parts.append(next_part)
+        parts.append("次期は現在の支援を継続しつつ、本人の希望に応じて次の目標を設定します。")
 
     text = "".join(parts)
     if len(text) > MAX_OVERALL_CHARS:
