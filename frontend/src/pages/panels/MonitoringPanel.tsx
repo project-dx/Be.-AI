@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { errorMessage, monitoringApi } from '../../services/api'
 import { Card, EmptyState, ErrorMessage, Loading } from '../../components/ui'
 import { Field, inputClass, PrimaryButton, SecondaryButton } from '../../components/form'
+import { ScoreTrendChart } from '../../components/ScoreTrendChart'
 import { formatDate } from '../../utils/labels'
 import type { MonitoringEvaluation } from '../../types'
 
@@ -109,31 +110,9 @@ export default function MonitoringPanel({ userId }: { userId: number }) {
               </div>
 
               {/* スコアの前半→後半比較 */}
-              {Object.keys(scores).length > 0 && (
-                <div className="mb-4 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {Object.entries(scores).map(([key, s]) => {
-                    const diff = s.diff
-                    const tone =
-                      diff == null ? 'text-ink-faint'
-                        : diff >= 5 ? 'text-brand-leaf'
-                          : diff <= -5 ? 'text-brand-coral'
-                            : 'text-ink-soft'
-                    return (
-                      <div key={key} className="rounded-2xl bg-paper px-3 py-2">
-                        <p className="text-[11px] font-bold text-ink-faint">{s.label}</p>
-                        <p className="text-sm font-bold text-ink">
-                          {s.before ?? '—'} <span className="text-ink-faint">→</span> {s.after ?? '—'}
-                          {diff != null && (
-                            <span className={`ml-1.5 text-xs ${tone}`}>
-                              {diff > 0 ? '+' : ''}{diff}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
+              <div className="mb-4">
+                <ScoreTrendChart scores={scores} />
+              </div>
 
               <div className="space-y-3">
                 {EDITABLE_FIELDS.map((f) => {

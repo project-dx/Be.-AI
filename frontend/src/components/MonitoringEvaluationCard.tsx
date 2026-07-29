@@ -4,6 +4,7 @@ import { errorMessage, monitoringApi } from '../services/api'
 import { Card, EmptyState, ErrorMessage } from './ui'
 import { PrimaryButton } from './form'
 import { LONG_PRESETS, PeriodPicker, daysAgoISO, todayISO } from './PeriodPicker'
+import { ScoreTrendChart } from './ScoreTrendChart'
 import type { MonitoringEvaluation } from '../types'
 
 const DETAIL_FIELDS: { key: keyof MonitoringEvaluation; label: string; chip: string }[] = [
@@ -99,32 +100,7 @@ export function MonitoringEvaluationCard({ users }: { users: { user_id: number; 
           )}
 
           {/* 日々の状態の可視化（スコアの前半→後半） */}
-          {Object.keys(scores).length > 0 && (
-            <div>
-              <p className="mb-1.5 text-sm font-bold text-ink">📊 日々の状態の推移（期間の前半 → 後半）</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {Object.entries(scores).map(([key, s]) => {
-                  const diff = s.diff
-                  const tone =
-                    diff == null ? 'text-ink-faint'
-                      : diff >= 5 ? 'text-brand-leaf'
-                        : diff <= -5 ? 'text-brand-coral'
-                          : 'text-ink-soft'
-                  return (
-                    <div key={key} className="rounded-2xl bg-paper px-3 py-2">
-                      <p className="text-[11px] font-bold text-ink-faint">{s.label}</p>
-                      <p className="text-sm font-bold text-ink">
-                        {s.before ?? '—'} <span className="text-ink-faint">→</span> {s.after ?? '—'}
-                        {diff != null && (
-                          <span className={`ml-1.5 text-xs ${tone}`}>{diff > 0 ? '+' : ''}{diff}</span>
-                        )}
-                      </p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+          <ScoreTrendChart scores={scores} />
 
           {/* 内訳 */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
