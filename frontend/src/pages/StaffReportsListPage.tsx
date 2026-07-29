@@ -82,6 +82,20 @@ export default function StaffReportsListPage() {
 
   useEffect(load, [load])
 
+  // スタッフを切り替えたら、その人の記録がある最新の月を開く
+  // （今月に記録がないと空のカレンダーが出てしまうため）
+  useEffect(() => {
+    if (staffId === '') return
+    staffReportsApi
+      .listAll({ staff_id: Number(staffId), limit: 1 })
+      .then((rows) => {
+        if (rows.length > 0) setYearMonth(rows[0].report_date.slice(0, 7))
+      })
+      .catch(() => {
+        /* 記録が取れないときは現在の月のまま表示する */
+      })
+  }, [staffId])
+
   // 選択肢は登録されているスタッフ全員（まだ記録がない人も選べるようにする）
   useEffect(() => {
     usersApi
