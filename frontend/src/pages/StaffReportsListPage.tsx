@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { errorMessage, staffReportsApi } from '../services/api'
+import { errorMessage, staffReportsApi, usersApi } from '../services/api'
 import { Badge, Card, EmptyState, ErrorMessage, Loading } from '../components/ui'
 import { SecondaryButton } from '../components/form'
 import { formatDate, urgencyLabels } from '../utils/labels'
@@ -82,19 +82,17 @@ export default function StaffReportsListPage() {
 
   useEffect(load, [load])
 
-  // 選択肢は「実際に記録を書いたスタッフ」から作る
+  // 選択肢は登録されているスタッフ全員（まだ記録がない人も選べるようにする）
   useEffect(() => {
-    staffReportsApi
-      .listAll({ limit: 500 })
-      .then((all) => {
-        const byId = new Map<number, string>()
-        for (const r of all) {
-          if (!byId.has(r.staff_id)) byId.set(r.staff_id, r.staff_name ?? `スタッフ#${r.staff_id}`)
-        }
-        const list = Array.from(byId, ([id, name]) => ({ id, name }))
-        setStaffMembers(list)
+    usersApi
+      .list('staff')
+      .then((list) => {
+        const options = list
+          .filter((u) => u.is_active)
+          .map((u) => ({ id: u.id, name: u.profile?.display_name ?? u.email }))
+        setStaffMembers(options)
         // カレンダーは1人分を見る画面なので、未選択なら先頭のスタッフを選んでおく
-        setStaffId((prev) => (prev === '' && list.length > 0 ? list[0].id : prev))
+        setStaffId((prev) => (prev === '' && options.length > 0 ? options[0].id : prev))
       })
       .catch(() => setStaffMembers([]))
   }, [])
@@ -253,17 +251,9 @@ export default function StaffReportsListPage() {
                                     : 'bg-brand-sun-soft'
                               }`}
                             >
-                              <p className="mb-1 flex flex-wrap items-center gap-2">
-                                <Link
-                                  to={`/users/${r.user_id}?tab=staff-reports`}
-                                  className="text-xs font-bold text-ink underline decoration-line-strong underline-offset-2 hover:decoration-brand-leaf"
-                                >
-                                  {r.user_name ?? `利用者#${r.user_id}`} さんへの支援
-                                </Link>
-                                {r.staff_name && (
-                                  <span className="ml-auto text-[11px] text-ink-faint">記録: {r.staff_name}</span>
-                                )}
-                              </p>
+                              {r.staff_name && (
+                                <p className="mb-0.5 text-right text-[11px] text-ink-faint">記録: {r.staff_name}</p>
+                              )}
                               <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">
                                 {r.support_content ?? '（記録本文なし）'}
                               </p>

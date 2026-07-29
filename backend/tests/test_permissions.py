@@ -113,3 +113,25 @@ def test_user_cannot_see_draft_support_plan(client, db, staff, member):
 
     staff_view = client.get(f"/api/users/{member.id}/support-plans", headers=staff_headers)
     assert len(staff_view.json()) == 1
+
+
+def test_staff_can_list_staff_colleagues(client, staff, other_staff, member, other_member):
+    """スタッフ日報の選択肢を作るため、スタッフは同僚のスタッフ一覧を取得できる"""
+    headers = login_headers(client, staff.email)
+    res = client.get("/api/users?role=staff", headers=headers)
+    assert res.status_code == 200, res.text
+    names = {u["profile"]["display_name"] for u in res.json()}
+    assert names == {"スタッフA", "スタッフB"}
+
+
+def test_staff_still_sees_only_assigned_members(client, staff, member, other_member):
+    """利用者の一覧は担当分のみに制限されたまま"""
+    headers = login_headers(client, staff.email)
+
+    res = client.get("/api/users?role=user", headers=headers)
+    assert res.status_code == 200
+    assert [u["id"] for u in res.json()] == [member.id]
+
+    # ロール未指定でも担当外の利用者は含まれない
+    res = client.get("/api/users", headers=headers)
+    assert other_member.id not in [u["id"] for u in res.json()]

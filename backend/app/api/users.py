@@ -20,8 +20,8 @@ def list_users(
     query = db.query(User).options(joinedload(User.profile))
     if role:
         query = query.filter(User.role == role)
-    if current_user.role == "staff":
-        # スタッフは担当利用者のみ
+    # スタッフが見られる利用者は担当分のみ（同僚のスタッフ・管理者の一覧は制限しない）
+    if current_user.role == "staff" and role in (None, "user"):
         query = query.join(Profile, Profile.user_id == User.id).filter(
             Profile.assigned_staff_id == current_user.id
         )
