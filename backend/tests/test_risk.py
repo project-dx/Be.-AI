@@ -1,7 +1,9 @@
 from datetime import date, timedelta
 
-from app.models import RiskAlert
-from app.services.risk import evaluate_user_risks
+from sqlalchemy.orm import Session
+
+from app.models import RiskAlert, StaffDailyReport, User
+from app.services.risk import evaluate_staff_report_risk, evaluate_user_risks
 from tests.conftest import add_report, login_headers
 
 TODAY = date.today()
@@ -106,3 +108,45 @@ def test_user_cannot_access_risk_alerts(client, member):
     headers = login_headers(client, "member@test.com")
     res = client.get("/api/risk-alerts", headers=headers)
     assert res.status_code == 403
+
+
+def test_staff_report_risky_expression_creates_alert(db: Session, member: User, staff: User) -> None:
+    """支援記録の本文に自傷などの表現があればアラートを作成する"""
+    report = StaffDailyReport(
+        user_id=member.id, staff_id=staff.id, report_date=date.today(),
+        support_content="作業中に興奮され、自傷行為を行って腕を噛もうとされていました。",
+        urgency="normal",
+    )
+    db.add(report)
+    db.flush()
+
+    alert = evaluate_staff_report_risk(db, report)
+    assert alert is not None
+    assert alert.alert_type == "risky_expression"
+    assert alert.severity == "high"
+    assert "確認が必要" in alert.reason
+
+
+def test_staff_report_without_risky_expression_creates_no_alert(
+    db: Session, member: User, staff: User
+) -> None:
+    report = StaffDailyReport(
+        user_id=member.id, staff_id=staff.id, report_date=date.today(),
+        support_content="箱折作業に集中して取り組めていました。挨拶もしっかり出来ています。",
+        urgency="normal",
+    )
+    db.add(report)
+    db.flush()
+    assert evaluate_staff_report_risk(db, report) is None
+
+
+def test_staff_report_urgent_still_creates_alert(db: Session, member: User, staff: User) -> None:
+    report = StaffDailyReport(
+        user_id=member.id, staff_id=staff.id, report_date=date.today(),
+        support_content="強い疲労を訴えている", urgency="urgent",
+    )
+    db.add(report)
+    db.flush()
+    alert = evaluate_staff_report_risk(db, report)
+    assert alert is not None
+    assert alert.alert_type == "staff_urgent"

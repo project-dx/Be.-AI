@@ -166,11 +166,41 @@ def evaluate_user_risks(db: Session, user_id: int, as_of: date) -> list[RiskAler
 
 
 def evaluate_staff_report_risk(db: Session, report: StaffDailyReport) -> RiskAlert | None:
-    """スタッフ日報の緊急度「至急」でアラートを作成。"""
-    if report.urgency != "urgent":
-        return None
-    return _create_alert_if_new(
-        db, report.user_id, "staff_urgent", "high",
-        f"スタッフ日報で緊急度「至急」が記録されました。{CONFIRM_NOTE}",
-        {"staff_report_id": report.id, "report_date": report.report_date.isoformat()},
+    """スタッフ日報からアラートを作成。
+
+    - 緊急度「至急」が記録された場合
+    - 記録本文に注意が必要な可能性のある表現（自傷・暴力など）が含まれる場合
+    どちらもルールベースの判定であり、スタッフによる確認を前提とする。
+    """
+    if report.urgency == "urgent":
+        return _create_alert_if_new(
+            db, report.user_id, "staff_urgent", "high",
+            f"スタッフ日報で緊急度「至急」が記録されました。{CONFIRM_NOTE}",
+            {"staff_report_id": report.id, "report_date": report.report_date.isoformat()},
+        )
+
+    text = " ".join(
+        filter(
+            None,
+            [
+                report.support_content,
+                report.user_condition,
+                report.conversation_summary,
+                report.issues,
+                report.behavior_changes,
+                report.free_text,
+            ],
+        )
     )
+    hits = [kw for kw in RISKY_KEYWORDS if kw in text]
+    if hits:
+        return _create_alert_if_new(
+            db, report.user_id, "risky_expression", "high",
+            f"支援記録に注意が必要な可能性のある表現が含まれています。{CONFIRM_NOTE}",
+            {
+                "staff_report_id": report.id,
+                "report_date": report.report_date.isoformat(),
+                "matched_count": len(hits),
+            },
+        )
+    return None
